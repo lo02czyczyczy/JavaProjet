@@ -85,6 +85,10 @@ public class Game {
 
     
     public void endRound() {
+
+        sustainShips();          // 维持飞船并移除无法维持的飞船
+        chooseSectorCards();     // 让玩家选择星区卡牌进行得分
+        
         // 显示并计算当前回合的得分
         calculateScores();
         scoreManager.calculateRoundScores(); // 计算并更新每个玩家的分数
