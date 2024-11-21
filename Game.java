@@ -238,6 +238,7 @@ public class Game {
     public void chooseSectorCards() {
         List<String> availableCards = new ArrayList<>(Arrays.asList("a", "b", "c", "d", "e", "f", "g", "h"));
         Scanner scanner = new Scanner(System.in);
+        System.out.println("/n Now pick a sector card to calculate the score for this round. /n");
 
         for (Player player : players) {
             System.out.println(player.getName() + ", choose a sector card from: " + availableCards);
