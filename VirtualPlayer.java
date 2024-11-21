@@ -4,18 +4,18 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class VirtualPlayer extends Player {
-    // ¹¹Ôìº¯Êı
+    // æ„é€ å‡½æ•°
     public VirtualPlayer(String name, int id, Game game) {
         super(name, id, game);
     }
 
-    // ¸²¸Ç placeShips ·½·¨
+    // è¦†ç›– placeShips æ–¹æ³•
     @Override
     public void placeShips(HexBoard hexBoard, Set<String> occupiedSectors) {
-        int shipsToPlace = 2;  // Ã¿´Î·ÅÖÃÁ½ËÒ´¬
-        Map<String, List<Hex>> cardHexes = hexBoard.generateCardHexes();  // »ñÈ¡ËùÓĞ¿¨ÅÆ¼°Æä¶ÔÓ¦µÄ×ø±ê
+        int shipsToPlace = 2;  // æ¯æ¬¡æ”¾ç½®ä¸¤è‰˜èˆ¹
+        Map<String, List<Hex>> cardHexes = hexBoard.generateCardHexes();  // è·å–æ‰€æœ‰å¡ç‰ŒåŠå…¶å¯¹åº”çš„åæ ‡
 
-        // ¹ıÂËÒÑÕ¼ÓÃµÄĞÇÏµ
+        // è¿‡æ»¤å·²å ç”¨çš„æ˜Ÿç³»
         List<String> availableSectors = cardHexes.keySet().stream()
                 .filter(sector -> !occupiedSectors.contains(sector))
                 .collect(Collectors.toList());
@@ -25,12 +25,12 @@ public class VirtualPlayer extends Player {
             return;
         }
 
-        // Ëæ»úÑ¡ÔñÒ»¸öĞÇÏµ
+        // éšæœºé€‰æ‹©ä¸€ä¸ªæ˜Ÿç³»
         Random rand = new Random();
         String selectedSector = availableSectors.get(rand.nextInt(availableSectors.size()));
-        occupiedSectors.add(selectedSector);  // ±ê¼Ç¸ÃĞÇÏµÒÑ±»Õ¼ÓÃ
+        occupiedSectors.add(selectedSector);  // æ ‡è®°è¯¥æ˜Ÿç³»å·²è¢«å ç”¨
 
-        // »ñÈ¡ËùÑ¡ĞÇÏµÖĞµÄ Level I ÏµÍ³
+        // è·å–æ‰€é€‰æ˜Ÿç³»ä¸­çš„ Level I ç³»ç»Ÿ
         List<Hex> levelIHexes = cardHexes.get(selectedSector).stream()
                 .filter(hex -> hexBoard.getBoard().get(hex).getSector() == 1)
                 .collect(Collectors.toList());
@@ -40,25 +40,25 @@ public class VirtualPlayer extends Player {
             return;
         }
 
-        // Ëæ»úÑ¡ÔñÒ»¸ö×ø±ê
+        // éšæœºé€‰æ‹©ä¸€ä¸ªåæ ‡
         Hex selectedHex = levelIHexes.get(rand.nextInt(levelIHexes.size()));
 
-        // ·ÅÖÃ½¢´¬²¢¸üĞÂÕ¼ÁìĞÅÏ¢
+        // æ”¾ç½®èˆ°èˆ¹å¹¶æ›´æ–°å é¢†ä¿¡æ¯
         for (int i = 1; i <= shipsToPlace; i++) {
             String shipId = generateShipId(ships.size() + 1);
             Ship newShip = new Ship(this, hexBoard.getBoard().get(selectedHex), selectedHex, shipId);
             ships.add(newShip);
-            hexBoard.updateOccupation(selectedHex, newShip); // ¸üĞÂÕ¼ÁìĞÅÏ¢
+            hexBoard.updateOccupation(selectedHex, newShip); // æ›´æ–°å é¢†ä¿¡æ¯
             System.out.println("VirtualPlayer " + getName() + " placed a ship with ID " + shipId + " at Hex coordinates " + selectedHex);
         }
     }
 
 
-    // ¸²¸Ç chooseCommandOrder ·½·¨
+    // è¦†ç›– chooseCommandOrder æ–¹æ³•
     @Override
     public List<Integer> chooseCommandOrder() {
         List<Integer> commands = Arrays.asList(1, 2, 3);
-        Collections.shuffle(commands);  // Ëæ»úÅÅĞòÃüÁî
+        Collections.shuffle(commands);  // éšæœºæ’åºå‘½ä»¤
         System.out.println("VirtualPlayer " + getName() + " chose command order: " + commands);
         return commands;
     }
@@ -67,15 +67,15 @@ public class VirtualPlayer extends Player {
     
     
     
-    // ¸²¸Ç expand ·½·¨
+    // è¦†ç›– expand æ–¹æ³•
     @Override
     public void expand(Game game) {
         int round = currentCommandOrder.indexOf(1) + 1;
-        int usage = game.getCommandUsage(round, 1); // »ñÈ¡¸ÃÂÖ "Expand" ÃüÁîµÄÊ¹ÓÃ´ÎÊı
-        int shipsToAdd = Math.max(4 - usage, 1); // ¼ÆËã¿ÉÒÔÌí¼ÓµÄ´¬Ö»ÊıÁ¿
+        int usage = game.getCommandUsage(round, 1); // è·å–è¯¥è½® "Expand" å‘½ä»¤çš„ä½¿ç”¨æ¬¡æ•°
+        int shipsToAdd = Math.max(4 - usage, 1); // è®¡ç®—å¯ä»¥æ·»åŠ çš„èˆ¹åªæ•°é‡
         System.out.println(getName() + " can add " + shipsToAdd + " ships using Expand command in round " + round);
 
-        // »ñÈ¡Íæ¼Òµ±Ç°¿ØÖÆµÄÏµÍ³
+        // è·å–ç©å®¶å½“å‰æ§åˆ¶çš„ç³»ç»Ÿ
         List<Hex> controlledHexes = hexBoard.getOccupationMap().entrySet().stream()
                 .filter(entry -> entry.getValue().getPlayerId() == this.id)
                 .map(Map.Entry::getKey)
@@ -88,56 +88,57 @@ public class VirtualPlayer extends Player {
 
         Random rand = new Random();
 
-        // Ëæ»úÔÚ¿ØÖÆµÄÏµÍ³ÖĞ·ÅÖÃĞÂµÄ½¢´¬
+        // éšæœºåœ¨æ§åˆ¶çš„ç³»ç»Ÿä¸­æ”¾ç½®æ–°çš„èˆ°èˆ¹
         while (shipsToAdd > 0) {
             Hex targetHex = controlledHexes.get(rand.nextInt(controlledHexes.size()));
             String shipId = generateShipId(ships.size() + 1);
             Ship newShip = new Ship(this, hexBoard.getBoard().get(targetHex), targetHex, shipId);
             ships.add(newShip);
-            hexBoard.updateOccupation(targetHex, newShip); // ¸üĞÂÕ¼ÁìĞÅÏ¢
+            hexBoard.updateOccupation(targetHex, newShip); // æ›´æ–°å é¢†ä¿¡æ¯
             System.out.println(getName() + " added ship " + shipId + " to hex " + targetHex);
             shipsToAdd--;
         }
+        System.out.println("**************************************************************************************************************************");
     }
 
 
     
     
     
-    // ¸²¸Ç explore ·½·¨
+    // è¦†ç›– explore æ–¹æ³•
     @Override
     public void explore(Game game) {
         int round = currentCommandOrder.indexOf(2) + 1;
         int usage = game.getCommandUsage(round, 2);
-        int fleetMovements = Math.max(4 - usage, 1); // ¿ÉÒÔ½øĞĞµÄ½¢¶ÓÒÆ¶¯´ÎÊı
+        int fleetMovements = Math.max(4 - usage, 1); // å¯ä»¥è¿›è¡Œçš„èˆ°é˜Ÿç§»åŠ¨æ¬¡æ•°
         System.out.println(getName() + " can make " + fleetMovements + " fleet movements using Explore command in round " + round);
 
         Random rand = new Random();
 
-        // »ñÈ¡ËùÓĞ¿ÉÒÔÒÆ¶¯µÄ½¢¶Ó£¨Í¬Ò»Î»ÖÃµÄ½¢´¬£©
+        // è·å–æ‰€æœ‰å¯ä»¥ç§»åŠ¨çš„èˆ°é˜Ÿï¼ˆåŒä¸€ä½ç½®çš„èˆ°èˆ¹ï¼‰
         Map<Hex, List<Ship>> fleets = ships.stream()
-                .filter(ship -> !ship.isMoved()) // Ö»Ñ¡ÔñÉĞÎ´ÒÆ¶¯µÄ½¢´¬
+                .filter(ship -> !ship.isMoved()) // åªé€‰æ‹©å°šæœªç§»åŠ¨çš„èˆ°èˆ¹
                 .collect(Collectors.groupingBy(Ship::getShipLocation));
 
         List<Hex> triPrimeHexes = Arrays.asList(new Hex(0, 0, 0), new Hex(1, -1, 0), new Hex(0, -1, 1), new Hex(1, 0, -1));
 
         while (fleetMovements > 0 && !fleets.isEmpty()) {
-            // Ëæ»úÑ¡ÔñÒ»¸ö½¢¶Ó
+            // éšæœºé€‰æ‹©ä¸€ä¸ªèˆ°é˜Ÿ
             List<Hex> fleetLocations = new ArrayList<>(fleets.keySet());
             Hex currentHex = fleetLocations.get(rand.nextInt(fleetLocations.size()));
             List<Ship> fleetShips = fleets.get(currentHex);
 
-            // ÒÆ³ıÒÑ¾­ÒÆ¶¯¹ıµÄ½¢´¬
+            // ç§»é™¤å·²ç»ç§»åŠ¨è¿‡çš„èˆ°èˆ¹
             fleetShips = fleetShips.stream().filter(ship -> !ship.isMoved()).collect(Collectors.toList());
             if (fleetShips.isEmpty()) {
                 fleets.remove(currentHex);
                 continue;
             }
 
-            // »ñÈ¡¿ÉÒÆ¶¯µÄÎ»ÖÃ£¨Â·¾¶³¤¶È×î¶àÎª2£©
+            // è·å–å¯ç§»åŠ¨çš„ä½ç½®ï¼ˆè·¯å¾„é•¿åº¦æœ€å¤šä¸º2ï¼‰
             List<List<Hex>> possiblePaths = getPossiblePaths(currentHex, 2);
 
-            // ¹ıÂËµô²»·ûºÏ¹æÔòµÄÂ·¾¶
+            // è¿‡æ»¤æ‰ä¸ç¬¦åˆè§„åˆ™çš„è·¯å¾„
             List<List<Hex>> validPaths = possiblePaths.stream()
                     .filter(path -> isValidPath(path, triPrimeHexes))
                     .collect(Collectors.toList());
@@ -147,31 +148,32 @@ public class VirtualPlayer extends Player {
                 continue;
             }
 
-            // Ëæ»úÑ¡ÔñÒ»ÌõÂ·¾¶
+            // éšæœºé€‰æ‹©ä¸€æ¡è·¯å¾„
             List<Hex> path = validPaths.get(rand.nextInt(validPaths.size()));
             Hex targetHex = path.get(path.size() - 1);
 
-            // ÒÆ¶¯½¢¶Ó
+            // ç§»åŠ¨èˆ°é˜Ÿ
             for (Ship ship : fleetShips) {
                 Hex previousHex = ship.getShipLocation();
                 ship.move(targetHex, hexBoard.getBoard().get(targetHex));
                 hexBoard.updateOccupation(targetHex, ship);
                 hexBoard.clearOccupation(previousHex, ship);
-                ship.setMoved(true); // ±ê¼ÇÎªÒÑÒÆ¶¯
+                ship.setMoved(true); // æ ‡è®°ä¸ºå·²ç§»åŠ¨
             }
 
             System.out.println(getName() + " moved fleet from " + currentHex + " to " + targetHex);
 
-            // ¸üĞÂ½¢¶ÓĞÅÏ¢
+            // æ›´æ–°èˆ°é˜Ÿä¿¡æ¯
             fleets.remove(currentHex);
             fleetMovements--;
         }
+        System.out.println("**************************************************************************************************************************");
 
-        // ÖØÖÃ½¢´¬µÄÒÆ¶¯×´Ì¬£¨Èç¹ûĞèÒªÔÚ»ØºÏ½áÊøºó£©
+        // é‡ç½®èˆ°èˆ¹çš„ç§»åŠ¨çŠ¶æ€ï¼ˆå¦‚æœéœ€è¦åœ¨å›åˆç»“æŸåï¼‰
         // ships.forEach(ship -> ship.setMoved(false));
     }
 
- // »ñÈ¡¿ÉÄÜµÄÂ·¾¶
+ // è·å–å¯èƒ½çš„è·¯å¾„
     private List<List<Hex>> getPossiblePaths(Hex startHex, int maxDistance) {
         List<List<Hex>> paths = new ArrayList<>();
         Queue<List<Hex>> queue = new LinkedList<>();
@@ -202,20 +204,20 @@ public class VirtualPlayer extends Player {
         return paths;
     }
 
-    // ¼ì²éÂ·¾¶ÊÇ·ñÓĞĞ§
+    // æ£€æŸ¥è·¯å¾„æ˜¯å¦æœ‰æ•ˆ
     private boolean isValidPath(List<Hex> path, List<Hex> triPrimeHexes) {
         for (int i = 1; i < path.size(); i++) {
             Hex hex = path.get(i);
-            // ¼ì²éÊÇ·ñ±»ÆäËûÍæ¼ÒÕ¼¾İ
+            // æ£€æŸ¥æ˜¯å¦è¢«å…¶ä»–ç©å®¶å æ®
             HexBoard.OccupationInfo info = hexBoard.getOccupationInfo(hex);
             if (info != null && info.getPlayerId() != this.id) {
                 return false;
             }
-            // ¼ì²éÊÇ·ñÊÇ±ßÔµµÄ¡°°ë¸ö¡±Áù±ßĞÎ¸ñ£¨sector µÈ¼¶Îª 0£©
+            // æ£€æŸ¥æ˜¯å¦æ˜¯è¾¹ç¼˜çš„â€œåŠä¸ªâ€å…­è¾¹å½¢æ ¼ï¼ˆsector ç­‰çº§ä¸º 0ï¼‰
             if (hexBoard.getBoard().get(hex).getSector() == 0) {
                 return false;
             }
-            // ¼ì²éÊÇ·ñ¾­¹ı Tri-Prime ÏµÍ³£¬Èç¹ûÊÇ£¬ĞèÒªÍ£Ö¹
+            // æ£€æŸ¥æ˜¯å¦ç»è¿‡ Tri-Prime ç³»ç»Ÿï¼Œå¦‚æœæ˜¯ï¼Œéœ€è¦åœæ­¢
             if (triPrimeHexes.contains(hex) && i != path.size() - 1) {
                 return false;
             }
@@ -229,7 +231,7 @@ public class VirtualPlayer extends Player {
     
 
     
-    // ¸²¸Ç exterminate ·½·¨
+    // è¦†ç›– exterminate æ–¹æ³•
     @Override
     public void exterminate(Game game) {
         int round = currentCommandOrder.indexOf(3) + 1;
@@ -242,7 +244,7 @@ public class VirtualPlayer extends Player {
         Set<Ship> usedShips = new HashSet<>();
 
         while (invasionsAllowed > 0) {
-            // ²éÕÒ¿ÉÒÔÇÖÂÔµÄÄ¿±êÏµÍ³
+            // æŸ¥æ‰¾å¯ä»¥ä¾µç•¥çš„ç›®æ ‡ç³»ç»Ÿ
             List<Hex> potentialTargets = ships.stream()
                     .filter(ship -> !usedShips.contains(ship))
                     .flatMap(ship -> ship.getShipLocation().getNeighbors(hexBoard.getBoard()).stream()
@@ -259,11 +261,11 @@ public class VirtualPlayer extends Player {
                 break;
             }
 
-            // Ëæ»úÑ¡ÔñÒ»¸öÄ¿±êÏµÍ³
+            // éšæœºé€‰æ‹©ä¸€ä¸ªç›®æ ‡ç³»ç»Ÿ
             Hex targetHex = potentialTargets.get(rand.nextInt(potentialTargets.size()));
             HexBoard.OccupationInfo targetInfo = hexBoard.getOccupationInfo(targetHex);
 
-            // ´ÓÏàÁÚµÄ¸ñ×ÓÖĞÑ¡Ôñ¿ÉÓÃµÄ½¢´¬
+            // ä»ç›¸é‚»çš„æ ¼å­ä¸­é€‰æ‹©å¯ç”¨çš„èˆ°èˆ¹
             List<Ship> availableShips = ships.stream()
                     .filter(ship -> !usedShips.contains(ship) && ship.getShipLocation().isNeighbor(targetHex))
                     .collect(Collectors.toList());
@@ -273,26 +275,27 @@ public class VirtualPlayer extends Player {
                 continue;
             }
 
-            // ¾ö¶¨ÒªÒÆ¶¯µÄ½¢´¬ÊıÁ¿£¨ÖÁÉÙÒ»ËÒ£©
+            // å†³å®šè¦ç§»åŠ¨çš„èˆ°èˆ¹æ•°é‡ï¼ˆè‡³å°‘ä¸€è‰˜ï¼‰
             int shipsToMove = rand.nextInt(availableShips.size()) + 1;
             List<Ship> invadingShips = availableShips.subList(0, shipsToMove);
 
-            // ÒÆ¶¯½¢´¬µ½Ä¿±êÏµÍ³
+            // ç§»åŠ¨èˆ°èˆ¹åˆ°ç›®æ ‡ç³»ç»Ÿ
             for (Ship ship : invadingShips) {
                 Hex currentHex = ship.getShipLocation();
                 ship.move(targetHex, hexBoard.getBoard().get(targetHex));
                 hexBoard.updateOccupation(targetHex, ship);
                 hexBoard.clearOccupation(currentHex, ship);
-                usedShips.add(ship); // ±ê¼ÇÎªÒÑÊ¹ÓÃ
+                usedShips.add(ship); // æ ‡è®°ä¸ºå·²ä½¿ç”¨
             }
 
             System.out.println(getName() + " is invading hex " + targetHex + " with " + invadingShips.size() + " ships.");
 
-            // ´¦ÀíÇÖÂÔ½á¹û
+            // å¤„ç†ä¾µç•¥ç»“æœ
             resolveInvasion(invadingShips.size(), targetInfo, targetHex);
 
             invasionsAllowed--;
         }
+        System.out.println("**************************************************************************************************************************");
     }
 
     private void resolveInvasion(int invadingShipsCount, HexBoard.OccupationInfo targetInfo, Hex targetHex) {
@@ -300,7 +303,7 @@ public class VirtualPlayer extends Player {
 
         int shipsToRemove = Math.min(invadingShipsCount, defendingShipsCount);
 
-        // ÒÆ³ı·ÀÊØ·½µÄ½¢´¬
+        // ç§»é™¤é˜²å®ˆæ–¹çš„èˆ°èˆ¹
         if (targetInfo != null) {
             List<Ship> defendingShips = targetInfo.getOccupyingShips();
             for (int i = 0; i < shipsToRemove; i++) {
@@ -310,13 +313,13 @@ public class VirtualPlayer extends Player {
                 System.out.println("Defending ship " + shipToRemove.getIdShip() + " has been destroyed.");
             }
 
-            // Èç¹û·ÀÊØ·½»¹ÓĞÊ£Óà½¢´¬£¬¸üĞÂÕ¼ÁìĞÅÏ¢
+            // å¦‚æœé˜²å®ˆæ–¹è¿˜æœ‰å‰©ä½™èˆ°èˆ¹ï¼Œæ›´æ–°å é¢†ä¿¡æ¯
             if (!defendingShips.isEmpty()) {
                 hexBoard.updateOccupation(targetHex, defendingShips.get(0));
             }
         }
 
-        // ÒÆ³ı½ø¹¥·½µÄ½¢´¬
+        // ç§»é™¤è¿›æ”»æ–¹çš„èˆ°èˆ¹
         List<Ship> invadingShips = hexBoard.getOccupationInfo(targetHex).getOccupyingShips().stream()
                 .filter(ship -> ship.getOwner() == this)
                 .collect(Collectors.toList());
@@ -329,36 +332,36 @@ public class VirtualPlayer extends Player {
             System.out.println("Invading ship " + shipToRemove.getIdShip() + " has been destroyed.");
         }
 
-        // ¼ì²éÇÖÂÔ½á¹û
+        // æ£€æŸ¥ä¾µç•¥ç»“æœ
         int remainingInvadingShips = invadingShips.size();
         int remainingDefendingShips = (targetInfo != null) ? targetInfo.getOccupyingShips().size() : 0;
 
         if (remainingInvadingShips > 0 && remainingDefendingShips == 0) {
-            // ¹¥»÷·½Õ¼Áì¸ÃÏµÍ³
+            // æ”»å‡»æ–¹å é¢†è¯¥ç³»ç»Ÿ
             System.out.println(getName() + " has taken control of hex " + targetHex);
         } else if (remainingDefendingShips > 0 && remainingInvadingShips == 0) {
-            // ·ÀÊØ·½±£Áô¿ØÖÆÈ¨
+            // é˜²å®ˆæ–¹ä¿ç•™æ§åˆ¶æƒ
             System.out.println("Defending player retains control of hex " + targetHex);
         } else {
-            // ÏµÍ³ÎŞÈË¿ØÖÆ
+            // ç³»ç»Ÿæ— äººæ§åˆ¶
             hexBoard.clearOccupation(targetHex, null);
             System.out.println("Hex " + targetHex + " is now unoccupied.");
         }
     }
 
 
-//    // ÊµÏÖ resolveAttack ·½·¨
+//    // å®ç° resolveAttack æ–¹æ³•
 //    private void resolveAttack(Ship attackingShip, Hex targetHex) {
 //        HexBoard.OccupationInfo targetInfo = hexBoard.getOccupationInfo(targetHex);
 //        List<Ship> targetShips = targetInfo.getOccupyingShips();
 //
-//        // ÒÆ³ıË«·½ÏàÍ¬ÊıÁ¿µÄ´¬Ö»£¬Ö±µ½Ò»·½Ã»ÓĞ´¬Ö»
-//        int attackingShipsCount = 1; // ÕâÀïÖ»¿¼ÂÇµ¥ËÒ¹¥»÷´¬
+//        // ç§»é™¤åŒæ–¹ç›¸åŒæ•°é‡çš„èˆ¹åªï¼Œç›´åˆ°ä¸€æ–¹æ²¡æœ‰èˆ¹åª
+//        int attackingShipsCount = 1; // è¿™é‡Œåªè€ƒè™‘å•è‰˜æ”»å‡»èˆ¹
 //        int defendingShipsCount = targetShips.size();
 //
 //        int shipsToRemove = Math.min(attackingShipsCount, defendingShipsCount);
 //
-//        // ÒÆ³ı·ÀÊØ·½µÄ´¬Ö»
+//        // ç§»é™¤é˜²å®ˆæ–¹çš„èˆ¹åª
 //        for (int i = 0; i < shipsToRemove; i++) {
 //            Ship shipToRemove = targetShips.get(0);
 //            targetShips.remove(shipToRemove);
@@ -366,16 +369,16 @@ public class VirtualPlayer extends Player {
 //            System.out.println("Defending ship " + shipToRemove.getIdShip() + " has been destroyed.");
 //        }
 //
-//        // ÒÆ³ı¹¥»÷·½µÄ´¬Ö»
+//        // ç§»é™¤æ”»å‡»æ–¹çš„èˆ¹åª
 //        ships.remove(attackingShip);
 //        hexBoard.clearOccupation(attackingShip.getShipLocation(), attackingShip);
 //        System.out.println("Attacking ship " + attackingShip.getIdShip() + " has been destroyed.");
 //
-//        // Èç¹û·ÀÊØ·½»¹ÓĞÊ£Óà´¬Ö»£¬¸üĞÂÕ¼ÁìĞÅÏ¢
+//        // å¦‚æœé˜²å®ˆæ–¹è¿˜æœ‰å‰©ä½™èˆ¹åªï¼Œæ›´æ–°å é¢†ä¿¡æ¯
 //        if (!targetShips.isEmpty()) {
 //            hexBoard.updateOccupation(targetHex, targetShips.get(0));
 //        } else {
-//            // Èç¹û·ÀÊØ·½Ã»ÓĞÊ£Óà´¬Ö»£¬¹¥»÷·½Õ¼Áì¸ÃÎ»ÖÃ
+//            // å¦‚æœé˜²å®ˆæ–¹æ²¡æœ‰å‰©ä½™èˆ¹åªï¼Œæ”»å‡»æ–¹å é¢†è¯¥ä½ç½®
 //            Ship newShip = new Ship(this, hexBoard.getBoard().get(targetHex), targetHex, generateShipId(ships.size() + 1));
 //            ships.add(newShip);
 //            hexBoard.updateOccupation(targetHex, newShip);
