@@ -93,6 +93,7 @@ public class Game {
         calculateScores();
         scoreManager.calculateRoundScores(); // 计算并更新每个玩家的分数
         scoreBoard.updateScores(); // 更新分数板显示
+        System.out.println("**************************************************************************************************************************");
 
         // 检查是否达到了最大回合数
         if (turnCounter >= maxTurns) {
