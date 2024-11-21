@@ -76,9 +76,6 @@ public class Game {
             player.endTurn();
         }
         this.updateCommandMatrix();
-        for (int i = 0; i < 3; i++) {
-            System.out.println(Arrays.toString(commandMatrix[i]));
-        }
         executeRound();  // 开始执行每个玩家的命令
         scoreManager.calculateRoundScores(); // 每个回合计算分数
         scoreBoard.updateScores(); // 更新分数板
