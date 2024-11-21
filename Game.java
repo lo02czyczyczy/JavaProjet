@@ -105,6 +105,7 @@ public class Game {
 
     
     public void summarizeShipPlacement() {
+        System.out.println("\n**************************************************************************************************************************");
         System.out.println("\nSummary of Ship Placement:");
 
         for (Player player : players) {
@@ -133,6 +134,7 @@ public class Game {
             }
             System.out.println();
         }
+        System.out.println("**************************************************************************************************************************");
     }
 
     // 获取某个坐标所属的星系标签的方法
