@@ -400,24 +400,43 @@ public class Player {
         System.out.println("Attacking ship " + attackingShip.getIdShip() + " has been destroyed.");
     }
 
+
+    
     //得分扇区计分
     public void calculatePlayerScore(String sectorCard, HexBoard hexBoard) {
         int score = 0;
         List<Hex> hexesInSector = hexBoard.generateCardHexes().get(sectorCard); // 获取选定卡牌的所有Hex坐标
 
         for (Hex hex : hexesInSector) {
-            if (hexBoard.getOccupationMap().containsKey(hex) && hexBoard.getOccupationMap().get(hex).getPlayerId() == this.id) {
-                score += hexBoard.getBoard().get(hex).getSector();  // Add the level of controlled sectors
+            OccupationInfo occupationInfo = hexBoard.getOccupationInfo(hex);
+            if (occupationInfo != null && occupationInfo.getPlayerId() == this.id) {
+                int systemLevel = hexBoard.getBoard().get(hex).getSector();  // 获取系统等级
+                score += systemLevel;  // 累加系统等级作为得分
             }
         }
 
-        // Check for control of Tri-Prime sector and add bonus points
-        List<Hex> triPrimeHexes = Arrays.asList(new Hex(0, 0, 0), new Hex(1, -1, 0), new Hex(0, -1, 1), new Hex(1, 0, -1));
-        if (triPrimeHexes.stream().allMatch(hex -> hexBoard.getOccupationMap().containsKey(hex) && hexBoard.getOccupationMap().get(hex).getPlayerId() == this.id)) {
-            score += 3;  // Bonus for controlling Tri-Prime
+        // 检查玩家是否控制了至少一个Tri-Prime的六边形，并增加额外得分
+        List<Hex> triPrimeHexes = Arrays.asList(
+            new Hex(0, 0, 0), 
+            new Hex(1, -1, 0), 
+            new Hex(0, -1, 1), 
+            new Hex(1, 0, -1)
+        );
+
+        boolean controlsTriPrime = false;
+        for (Hex hex : triPrimeHexes) {
+            OccupationInfo occupationInfo = hexBoard.getOccupationInfo(hex);
+            if (occupationInfo != null && occupationInfo.getPlayerId() == this.id) {
+                controlsTriPrime = true;
+                break;  // 一旦发现玩家控制了一个Tri-Prime的六边形，立即跳出循环
+            }
         }
 
-        this.score += score;  // Update the player's total score
+        if (controlsTriPrime) {
+            score += 3;  // 玩家控制了至少一个Tri-Prime的六边形，获得3分加成
+        }
+
+        this.addScore(score);  // 更新玩家的总得分
         System.out.println("Player " + getName() + " scored " + score + " points from sector card " + sectorCard);
     }
     
