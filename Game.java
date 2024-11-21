@@ -76,22 +76,22 @@ public class Game {
             player.endTurn();
         }
         this.updateCommandMatrix();
+       
         executeRound();  // 开始执行每个玩家的命令
-        scoreManager.calculateRoundScores(); // 每个回合计算分数
+        scoreManager.calculateRoundScores(this); // 每个回合计算分数
         scoreBoard.updateScores(); // 更新分数板
-        turnCounter++;  // 回合计数加一
         endRound();  // 调用endRound处理回合结束的逻辑
     }
 
     
     public void endRound() {
-
+    	
         sustainShips();          // 维持飞船并移除无法维持的飞船
         chooseSectorCards();     // 让玩家选择星区卡牌进行得分
         
         // 显示并计算当前回合的得分
         calculateScores();
-        scoreManager.calculateRoundScores(); // 计算并更新每个玩家的分数
+        scoreManager.calculateRoundScores(this); // 计算并更新每个玩家的分数
         scoreBoard.updateScores(); // 更新分数板显示
         System.out.println("**************************************************************************************************************************");
 
@@ -99,6 +99,7 @@ public class Game {
         if (turnCounter >= maxTurns) {
             endGame();  // 如果达到最大回合数，结束游戏
         } else {
+        	turnCounter++;  // 回合计数加一
             nextTurn();  // 否则，开始下一个回合
         }
     }
