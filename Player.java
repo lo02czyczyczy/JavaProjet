@@ -9,15 +9,15 @@ public class Player {
     private List<CommandCard> commandCards;
     private List<Sector> controlledSectors;
     private int score;
-    private int roundScore; // µ±ÂÖµÃ·Ö
+    private int roundScore; // å½“è½®å¾—åˆ†
     public int id;
-    private String color;  // ĞÂÔöÊôĞÔ£ºÑÕÉ«
-    private static final Scanner scanner = new Scanner(System.in); // ¹²Ïí Scanner ÊµÀı
+    private String color;  // æ–°å¢å±æ€§ï¼šé¢œè‰²
+    private static final Scanner scanner = new Scanner(System.in); // å…±äº« Scanner å®ä¾‹
     public HexBoard hexBoard;  
     public Game game; 
-    public List<Integer> currentCommandOrder;  // ´æ´¢µ±Ç°»ØºÏµÄÃüÁîË³Ğò
+    public List<Integer> currentCommandOrder;  // å­˜å‚¨å½“å‰å›åˆçš„å‘½ä»¤é¡ºåº
 
-    // ¹¹Ôìº¯Êı
+    // æ„é€ å‡½æ•°
     public Player(String name, int id, Game game) {
         this.game = game;
         this.ships = new ArrayList<>();
@@ -26,18 +26,18 @@ public class Player {
         this.score = 0;
         this.name = name;
         this.id = id;
-        this.color = assignColor(id);  // ¸ù¾İ id ·ÖÅäÑÕÉ«
-        this.hexBoard = game.getHexBoard(); // ´Ó Game ¶ÔÏó»ñÈ¡ hexBoard
+        this.color = assignColor(id);  // æ ¹æ® id åˆ†é…é¢œè‰²
+        this.hexBoard = game.getHexBoard(); // ä» Game å¯¹è±¡è·å– hexBoard
     }
 
-//    // ·½·¨´ÓÓÃ»§»ñÈ¡Ãû×Ö
+//    // æ–¹æ³•ä»ç”¨æˆ·è·å–åå­—
 //    private void setNameFromUser() {
 //        Scanner scanner = new Scanner(System.in);
 //        System.out.print("Please enter your name: ");
 //        name = scanner.nextLine();
 //    }
 //    
-//    // ·½·¨´ÓÓÃ»§»ñÈ¡id
+//    // æ–¹æ³•ä»ç”¨æˆ·è·å–id
 //    private void setIdFromUser() {
 //        boolean validId = false;
 //        while (!validId) {
@@ -55,9 +55,9 @@ public class Player {
 //        }
 //    }
     
-    // ·½·¨
+    // æ–¹æ³•
     
-    // ·ÖÅäÑÕÉ«µÄ·½·¨
+    // åˆ†é…é¢œè‰²çš„æ–¹æ³•
     private String assignColor(int id) {
         switch (id) {
             case 1:
@@ -76,15 +76,15 @@ public class Player {
     }
     
     
- // placeShips ·½·¨
+ // placeShips æ–¹æ³•
     public void placeShips(HexBoard hexBoard, Set<String> occupiedSectors) {
-        int shipsToPlace = 2;  // Ã¿´Î·ÅÖÃÁ½ËÒ´¬
-        Map<String, List<Hex>> cardHexes = hexBoard.generateCardHexes();  // »ñÈ¡ËùÓĞ¿¨ÅÆ¼°Æä¶ÔÓ¦µÄ×ø±ê
+        int shipsToPlace = 2;  // æ¯æ¬¡æ”¾ç½®ä¸¤è‰˜èˆ¹
+        Map<String, List<Hex>> cardHexes = hexBoard.generateCardHexes();  // è·å–æ‰€æœ‰å¡ç‰ŒåŠå…¶å¯¹åº”çš„åæ ‡
 
         String selectedSector = null;
         boolean validSector = false;
 
-        // Íæ¼ÒÑ¡ÔñĞÇÏµ
+        // ç©å®¶é€‰æ‹©æ˜Ÿç³»
         while (!validSector) {
             System.out.println("Sectors: " + cardHexes.keySet());
             System.out.print("Player " + name + ", choose a sector to place ships: ");
@@ -92,17 +92,17 @@ public class Player {
 
             if (cardHexes.containsKey(selectedSector) && !occupiedSectors.contains(selectedSector)) {
                 validSector = true;
-                occupiedSectors.add(selectedSector);  // ±ê¼Ç¸ÃĞÇÏµÒÑ±»Õ¼ÓÃ
+                occupiedSectors.add(selectedSector);  // æ ‡è®°è¯¥æ˜Ÿç³»å·²è¢«å ç”¨
             } else {
                 System.out.println("Invalid sector or sector already occupied. Please choose another.");
             }
         }
 
-        // Íæ¼ÒÑ¡Ôñ¾ßÌå×ø±ê
+        // ç©å®¶é€‰æ‹©å…·ä½“åæ ‡
         List<Hex> availableHexes = cardHexes.get(selectedSector);
         List<Hex> levelIHexes = new ArrayList<>();
         for (Hex hex : availableHexes) {
-            if (hexBoard.getBoard().get(hex).getSector() == 1) {  // Ö»Ñ¡Ôñ I ¼¶ÏµÍ³
+            if (hexBoard.getBoard().get(hex).getSector() == 1) {  // åªé€‰æ‹© I çº§ç³»ç»Ÿ
                 levelIHexes.add(hex);
             }
         }
@@ -123,15 +123,15 @@ public class Player {
 
             System.out.print("Player " + name + ", choose coordinates to place 2 ships: ");
             String[] coordinates = scanner.nextLine().split(",");
-            if (coordinates.length == 3) {  // È·±£ÊäÈëÁËÈı¸ö²¿·Ö
+            if (coordinates.length == 3) {  // ç¡®ä¿è¾“å…¥äº†ä¸‰ä¸ªéƒ¨åˆ†
                 try {
                     int q = Integer.parseInt(coordinates[0].trim());
                     int r = Integer.parseInt(coordinates[1].trim());
                     int s = Integer.parseInt(coordinates[2].trim());
 
-                    if (q + r + s != 0) {  // ÑéÖ¤×ø±êÊÇ·ñÂú×ãÁù±ßĞÎ×ø±êÏµÌõ¼ş
+                    if (q + r + s != 0) {  // éªŒè¯åæ ‡æ˜¯å¦æ»¡è¶³å…­è¾¹å½¢åæ ‡ç³»æ¡ä»¶
                         System.out.println("Invalid coordinates. Coordinates must satisfy q + r + s = 0.");
-                        continue;  // Èç¹û²»Âú×ãÌõ¼ş£¬¼ÌĞøÑ­»·£¬ÈÃÓÃ»§ÖØĞÂÊäÈë
+                        continue;  // å¦‚æœä¸æ»¡è¶³æ¡ä»¶ï¼Œç»§ç»­å¾ªç¯ï¼Œè®©ç”¨æˆ·é‡æ–°è¾“å…¥
                     }
 
                     Hex hex = new Hex(q, r, s);
@@ -149,27 +149,27 @@ public class Player {
             }
         }
 
-        // ·ÅÖÃ½¢´¬²¢¸üĞÂÕ¼ÁìĞÅÏ¢
+        // æ”¾ç½®èˆ°èˆ¹å¹¶æ›´æ–°å é¢†ä¿¡æ¯
         for (int i = 1; i <= shipsToPlace; i++) {
             String shipId = generateShipId(ships.size() + 1);
             Ship newShip = new Ship(this, hexBoard.getBoard().get(selectedHex), selectedHex, shipId);
             ships.add(newShip);
-            hexBoard.updateOccupation(selectedHex, newShip); // ¸üĞÂÕ¼ÁìĞÅÏ¢
+            hexBoard.updateOccupation(selectedHex, newShip); // æ›´æ–°å é¢†ä¿¡æ¯
             System.out.println("Player " + name + " placed a ship with ID " + shipId + " at Hex coordinates " + selectedHex);
         }
     }
 
 
-    // Éú³É½¢´¬ ID µÄ·½·¨
+    // ç”Ÿæˆèˆ°èˆ¹ ID çš„æ–¹æ³•
     public String generateShipId(int shipNumber) {
-        return id + "-" + shipNumber;  // ·µ»Ø¸ñÊ½Îª "Íæ¼ÒID-±àºÅ"£¬ÀıÈç "1-1"
+        return id + "-" + shipNumber;  // è¿”å›æ ¼å¼ä¸º "ç©å®¶ID-ç¼–å·"ï¼Œä¾‹å¦‚ "1-1"
     }
     
     public void endTurn() {
         ships.forEach(ship -> ship.setMoved(false));
     }
     
-    //Ñ¡Ö¸Áî¿¨
+    //é€‰æŒ‡ä»¤å¡
     public List<Integer> chooseCommandOrder() {
     	System.out.println("Choosing command order for " + getName());
         List<Integer> order = new ArrayList<>();
@@ -182,11 +182,11 @@ public class Player {
             try {
                 for (int i = 1; i <= 3; i++) {
                     System.out.print("Enter command " + i + ": ");
-                    String commandChoice = scanner.nextLine(); // ¸ÄÎª nextLine
+                    String commandChoice = scanner.nextLine(); // æ”¹ä¸º nextLine
                     if (commandChoice.equalsIgnoreCase("CHEN")) {
                     	System.out.print("Congratulations on discovering the Easter egg in this game!");
                         order.clear();
-                        order.add(999); // Ê¹ÓÃ999×÷ÎªÌØÊâ±êÖ¾
+                        order.add(999); // ä½¿ç”¨999ä½œä¸ºç‰¹æ®Šæ ‡å¿—
                         validInput = true;
                         break;
                     }
@@ -196,11 +196,11 @@ public class Player {
                     }
                     order.add(cmd);
                 }
-                validInput = true; // Èç¹ûËùÓĞÊäÈë¶¼ÊÇÓĞĞ§µÄ£¬ÉèÖÃ validInput Îª true£¬½áÊøÑ­»·
+                validInput = true; // å¦‚æœæ‰€æœ‰è¾“å…¥éƒ½æ˜¯æœ‰æ•ˆçš„ï¼Œè®¾ç½® validInput ä¸º trueï¼Œç»“æŸå¾ªç¯
             } catch (NumberFormatException e) {
                 System.out.println("Invalid input. Please enter numeric values only.");
             } catch (IllegalArgumentException e) {
-                System.out.println(e.getMessage()); // Êä³ö¾ßÌåµÄ´íÎóĞÅÏ¢
+                System.out.println(e.getMessage()); // è¾“å‡ºå…·ä½“çš„é”™è¯¯ä¿¡æ¯
             }
         }
         return order;
@@ -208,7 +208,7 @@ public class Player {
     
 
     
-    // ·½·¨ÓÃÓÚ¹Ø±Õ Scanner£¬Ö»ÓĞµ±Õû¸ö³ÌĞò½áÊøÊ±²Åµ÷ÓÃ
+    // æ–¹æ³•ç”¨äºå…³é—­ Scannerï¼Œåªæœ‰å½“æ•´ä¸ªç¨‹åºç»“æŸæ—¶æ‰è°ƒç”¨
     public static void closeScanner() {
         if (scanner != null) {
             scanner.close();
@@ -216,14 +216,14 @@ public class Player {
     }
 
     
-    //EXPAND¿¨ÅÆ
+    //EXPANDå¡ç‰Œ
     public void expand(Game game) {
         int round = currentCommandOrder.indexOf(1) + 1;
-        int usage = game.getCommandUsage(round, 1); // »ñÈ¡¸ÃÂÖ"Expand"ÃüÁîµÄÊ¹ÓÃ´ÎÊı
-        int shipsToAdd = Math.max(4 - usage, 1); // ¼ÆËã¿ÉÒÔÌí¼ÓµÄ´¬Ö»ÊıÁ¿
+        int usage = game.getCommandUsage(round, 1); // è·å–è¯¥è½®"Expand"å‘½ä»¤çš„ä½¿ç”¨æ¬¡æ•°
+        int shipsToAdd = Math.max(4 - usage, 1); // è®¡ç®—å¯ä»¥æ·»åŠ çš„èˆ¹åªæ•°é‡
         System.out.println(name + " can add " + shipsToAdd + " ships using Expand command in round " + round);
 
-        // ÏÔÊ¾Íæ¼Òµ±Ç°¿ØÖÆµÄÏµÍ³ºÍËûÃÇ¿ÉÓÃÀ´·ÅÖÃĞÂ´¬Ö»µÄÎ»ÖÃ
+        // æ˜¾ç¤ºç©å®¶å½“å‰æ§åˆ¶çš„ç³»ç»Ÿå’Œä»–ä»¬å¯ç”¨æ¥æ”¾ç½®æ–°èˆ¹åªçš„ä½ç½®
         List<Hex> controlledHexes = new ArrayList<>();
         hexBoard.getOccupationMap().forEach((hex, occupationInfo) -> {
             if (occupationInfo.getPlayerId() == this.id) {
@@ -232,7 +232,7 @@ public class Player {
             }
         });
 
-        // ÌáÊ¾Íæ¼ÒÑ¡ÔñÔÚÄÄĞ©ÏµÍ³ÖĞ·ÅÖÃĞÂµÄ½¢´¬
+        // æç¤ºç©å®¶é€‰æ‹©åœ¨å“ªäº›ç³»ç»Ÿä¸­æ”¾ç½®æ–°çš„èˆ°èˆ¹
         System.out.println("You can distribute " + shipsToAdd + " ships among the controlled hexes.");
         int shipsPlaced = 0;
         Scanner scanner = new Scanner(System.in);
@@ -253,7 +253,7 @@ public class Player {
                     for (int i = 0; i < count; i++) {
                         Ship newShip = new Ship(this, hexBoard.getBoard().get(targetHex), targetHex, generateShipId(ships.size() + 1));
                         ships.add(newShip);
-                        hexBoard.updateOccupation(targetHex, newShip); // ¸üĞÂÕ¼ÁìĞÅÏ¢
+                        hexBoard.updateOccupation(targetHex, newShip); // æ›´æ–°å é¢†ä¿¡æ¯
                     }
                     shipsToAdd -= count;
                     System.out.println("Added " + count + " ships to hex " + targetHex);
@@ -266,24 +266,25 @@ public class Player {
         }
 
         System.out.println("All ships placed for this round.");
+        System.out.println("**************************************************************************************************************************");
     }
 
 
-    //EXPLORE¿¨ÅÆ
+    //EXPLOREå¡ç‰Œ
     public void explore(Game game) {
     	int round = currentCommandOrder.indexOf(2) + 1;
-        int usage = game.getCommandUsage(round,2); // ´ÓGame»ñÈ¡¸ÃÂÖexploreÃüÁîµÄÊ¹ÓÃ´ÎÊı
+        int usage = game.getCommandUsage(round,2); // ä»Gameè·å–è¯¥è½®exploreå‘½ä»¤çš„ä½¿ç”¨æ¬¡æ•°
 
-        int movesPerShip = Math.max(4 - usage, 1); // Ã¿ËÒ´¬µÄ¿ÉÒÆ¶¯´ÎÊı
+        int movesPerShip = Math.max(4 - usage, 1); // æ¯è‰˜èˆ¹çš„å¯ç§»åŠ¨æ¬¡æ•°
         System.out.println(name + " can move each ship " + movesPerShip + " times using Explore command in round " + round);
 
-        // ÏÔÊ¾ËùÓĞ·É´¬¼°ÆäÎ»ÖÃ
+        // æ˜¾ç¤ºæ‰€æœ‰é£èˆ¹åŠå…¶ä½ç½®
         ships.forEach(ship -> {
             Hex shipPosition = ship.getShipLocation();
             System.out.println("Ship ID: " + ship.getIdShip() + " at Hex coordinates " + shipPosition);
         });
 
-        // Íæ¼ÒÑ¡Ôñ·É´¬ºÍÒÆ¶¯²Ù×÷
+        // ç©å®¶é€‰æ‹©é£èˆ¹å’Œç§»åŠ¨æ“ä½œ
         for (Ship ship : ships) {
             System.out.println("Move Ship ID: " + ship.getIdShip() + " at Hex coordinates " + ship.getShipLocation());
 
@@ -291,7 +292,7 @@ public class Player {
                 System.out.println("Enter new coordinates for move " + (i+1) + " (or skip):");
                 String input = scanner.nextLine();
                 if (input.equalsIgnoreCase("skip")) {
-                    break; // Ìø¹ı´Ë´¬µÄÒÆ¶¯
+                    break; // è·³è¿‡æ­¤èˆ¹çš„ç§»åŠ¨
                 }
 
                 String[] parts = input.split(" ");
@@ -301,11 +302,11 @@ public class Player {
                     int s = Integer.parseInt(parts[2]);
                     Hex targetHex = new Hex(q, r, s);
 
-                    // ¼ì²éÄ¿±êHexÊÇ·ñÎªÓĞĞ§ÒÆ¶¯Ñ¡Ïî
+                    // æ£€æŸ¥ç›®æ ‡Hexæ˜¯å¦ä¸ºæœ‰æ•ˆç§»åŠ¨é€‰é¡¹
                     if (isValidMove(ship.getShipLocation(), targetHex)) {
-                        ship.move(targetHex, hexBoard.getBoard().get(targetHex)); // ÒÆ¶¯´¬Ö»
-                        hexBoard.updateOccupation(targetHex, ship); // ¸üĞÂÕ¼ÁìĞÅÏ¢
-                        hexBoard.clearOccupation(ship.getShipLocation(), ship); // Çå³ıÔ­Î»ÖÃµÄÕ¼ÁìĞÅÏ¢
+                        ship.move(targetHex, hexBoard.getBoard().get(targetHex)); // ç§»åŠ¨èˆ¹åª
+                        hexBoard.updateOccupation(targetHex, ship); // æ›´æ–°å é¢†ä¿¡æ¯
+                        hexBoard.clearOccupation(ship.getShipLocation(), ship); // æ¸…é™¤åŸä½ç½®çš„å é¢†ä¿¡æ¯
                     } else {
                         System.out.println("Invalid move. Hex occupied by other player or out of reach.");
                     }
@@ -314,10 +315,11 @@ public class Player {
                 }
             }
         }
+        System.out.println("**************************************************************************************************************************");
     }
 
     private boolean isValidMove(Hex from, Hex to) {
-        // ¼ì²éÊÇ·ñÏàÁÚÒÔ¼°Ä¿±êhexÊÇ·ñ±»ÆäËûÍæ¼ÒÕ¼Áì
+        // æ£€æŸ¥æ˜¯å¦ç›¸é‚»ä»¥åŠç›®æ ‡hexæ˜¯å¦è¢«å…¶ä»–ç©å®¶å é¢†
         if (from.isNeighbor(to) && hexBoard.getOccupationInfo(to) == null) {
             return true;
         } else {
@@ -326,26 +328,26 @@ public class Player {
     }
 
 
-    //EXTERMINATE¿¨ÅÆ
+    //EXTERMINATEå¡ç‰Œ
     public void exterminate(Game game) {
     	int round = currentCommandOrder.indexOf(3) + 1;
-        int usage = game.getCommandUsage(round,3); // ´ÓGame»ñÈ¡¸ÃÂÖexterminateÃüÁîµÄÊ¹ÓÃ´ÎÊı
+        int usage = game.getCommandUsage(round,3); // ä»Gameè·å–è¯¥è½®exterminateå‘½ä»¤çš„ä½¿ç”¨æ¬¡æ•°
 
-        int attacksAllowed = Math.max(4 - usage, 1); // Íæ¼ÒµÄ×Ü½ø¹¥´ÎÊı
+        int attacksAllowed = Math.max(4 - usage, 1); // ç©å®¶çš„æ€»è¿›æ”»æ¬¡æ•°
         System.out.println(name + " has " + attacksAllowed + " total attacks using Exterminate command in round " + round);
 
-        // ÏÔÊ¾ËùÓĞ·É´¬¼°ÆäÎ»ÖÃ
+        // æ˜¾ç¤ºæ‰€æœ‰é£èˆ¹åŠå…¶ä½ç½®
         ships.forEach(ship -> {
             Hex shipPosition = ship.getShipLocation();
             System.out.println("Ship ID: " + ship.getIdShip() + " at Hex coordinates " + shipPosition);
         });
 
-        // Íæ¼ÒÑ¡Ôñ·É´¬ºÍ½ø¹¥²Ù×÷
+        // ç©å®¶é€‰æ‹©é£èˆ¹å’Œè¿›æ”»æ“ä½œ
         while (attacksAllowed > 0) {
             System.out.println("Select a ship and an adjacent hex to attack (or type 'skip' to end attacks):");
             String input = scanner.nextLine();
             if (input.equalsIgnoreCase("skip")) {
-                break; // Íæ¼ÒÑ¡Ôñ½áÊø½ø¹¥
+                break; // ç©å®¶é€‰æ‹©ç»“æŸè¿›æ”»
             }
 
             String[] parts = input.split(" ");
@@ -358,7 +360,7 @@ public class Player {
                 Hex targetHex = new Hex(q, r, s);
 
                 if (attackingShip != null && isValidAttack(attackingShip.getShipLocation(), targetHex)) {
-                    resolveAttack(attackingShip, targetHex); // Ö´ĞĞ½ø¹¥
+                    resolveAttack(attackingShip, targetHex); // æ‰§è¡Œè¿›æ”»
                     attacksAllowed--;
                 } else {
                     System.out.println("Invalid attack. Check if target is adjacent and occupied by enemy ships.");
@@ -368,6 +370,7 @@ public class Player {
             }
         }
         System.out.println("All attacks have been executed.");
+        System.out.println("**************************************************************************************************************************");
     }
 
     private Ship findShipById(int shipId) {
@@ -397,10 +400,10 @@ public class Player {
         System.out.println("Attacking ship " + attackingShip.getIdShip() + " has been destroyed.");
     }
 
-    //µÃ·ÖÉÈÇø¼Æ·Ö
+    //å¾—åˆ†æ‰‡åŒºè®¡åˆ†
     public void calculatePlayerScore(String sectorCard, HexBoard hexBoard) {
         int score = 0;
-        List<Hex> hexesInSector = hexBoard.generateCardHexes().get(sectorCard); // »ñÈ¡Ñ¡¶¨¿¨ÅÆµÄËùÓĞHex×ø±ê
+        List<Hex> hexesInSector = hexBoard.generateCardHexes().get(sectorCard); // è·å–é€‰å®šå¡ç‰Œçš„æ‰€æœ‰Hexåæ ‡
 
         for (Hex hex : hexesInSector) {
             if (hexBoard.getOccupationMap().containsKey(hex) && hexBoard.getOccupationMap().get(hex).getPlayerId() == this.id) {
@@ -428,7 +431,7 @@ public class Player {
 
     public void addScore(int score) {
         this.score += score;
-        this.roundScore = score; // ÉèÖÃµ±ÂÖµÃ·Ö
+        this.roundScore = score; // è®¾ç½®å½“è½®å¾—åˆ†
     }
 
     
