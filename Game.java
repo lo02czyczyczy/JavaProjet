@@ -11,66 +11,66 @@ public class Game {
     private int turnCounter;
     private int maxTurns; 
     private Player startPlayer;
-    private ScoreManager scoreManager; // Ìí¼Ó¶ÔScoreManagerµÄÒıÓÃ
+    private ScoreManager scoreManager; // æ·»åŠ å¯¹ScoreManagerçš„å¼•ç”¨
     private ScoreBoard scoreBoard;
     private HexBoard hexBoard;  
-    private HexBoardDisplay hexBoardDisplay;  // Ìí¼Ó HexBoardDisplay
+    private HexBoardDisplay hexBoardDisplay;  // æ·»åŠ  HexBoardDisplay
     private OccupationDisplay occupationDisplay;
-    private int[][] commandMatrix = new int[3][3]; // 3x3¾ØÕó£¬Ë÷Òı0¶ÔÓ¦Expand£¬1¶ÔÓ¦Explore£¬2¶ÔÓ¦Exterminate
+    private int[][] commandMatrix = new int[3][3]; // 3x3çŸ©é˜µï¼Œç´¢å¼•0å¯¹åº”Expandï¼Œ1å¯¹åº”Exploreï¼Œ2å¯¹åº”Exterminate
 
 
- // ¹¹Ôìº¯Êı
+ // æ„é€ å‡½æ•°
     public Game(int maxTurns, Player startPlayer, List<Player> players) {
-        this.players = players;  // Ê¹ÓÃ´«ÈëµÄÍæ¼ÒÁĞ±í£¬¶ø²»ÊÇĞÂ´´½¨µÄ¿ÕÁĞ±í
+        this.players = players;  // ä½¿ç”¨ä¼ å…¥çš„ç©å®¶åˆ—è¡¨ï¼Œè€Œä¸æ˜¯æ–°åˆ›å»ºçš„ç©ºåˆ—è¡¨
         this.sectors = new ArrayList<>();
         this.turnCounter = 0;
         this.maxTurns = maxTurns;
         this.startPlayer = startPlayer;
-        this.scoreManager = new ScoreManager(players, this); // ³õÊ¼»¯ScoreManager
-        this.hexBoard = new HexBoard();  // ´´½¨ HexBoard
+        this.scoreManager = new ScoreManager(players, this); // åˆå§‹åŒ–ScoreManager
+        this.hexBoard = new HexBoard();  // åˆ›å»º HexBoard
         this.hexBoardDisplay = new HexBoardDisplay(hexBoard);
         this.occupationDisplay = new OccupationDisplay(hexBoard);
     }
 
     
-    // ·½·¨
+    // æ–¹æ³•
     public void startGame() {
         EventQueue.invokeLater(() -> hexBoardDisplay.setVisible(true));
-        EventQueue.invokeLater(() -> occupationDisplay.displayOccupation()); // ÏÔÊ¾Õ¼ÁìÇé¿ö
+        EventQueue.invokeLater(() -> occupationDisplay.displayOccupation()); // æ˜¾ç¤ºå é¢†æƒ…å†µ
         String cardInfo = hexBoard.getCardSectorInfo();
         System.out.println(cardInfo);
-        this.turnCounter = 1;  // ÓÎÏ·¿ªÊ¼£¬ÉèÖÃ»ØºÏ¼ÆÊıÎª1
-        this.scoreBoard = new ScoreBoard(scoreManager); // ³õÊ¼»¯·ÖÊı°å
+        this.turnCounter = 1;  // æ¸¸æˆå¼€å§‹ï¼Œè®¾ç½®å›åˆè®¡æ•°ä¸º1
+        this.scoreBoard = new ScoreBoard(scoreManager); // åˆå§‹åŒ–åˆ†æ•°æ¿
 
-        // ÔÚÓÎÏ·¿ªÊ¼Ê±·ÅÖÃ½¢´¬
+        // åœ¨æ¸¸æˆå¼€å§‹æ—¶æ”¾ç½®èˆ°èˆ¹
         System.out.println("Starting ship placement...");
 
-        // Ë³Ê±Õë·ÅÖÃ½¢´¬
-        Set<String> occupiedSectors = new HashSet<>();  // ´æ´¢ÒÑÕ¼ÓÃµÄĞÇÏµ
+        // é¡ºæ—¶é’ˆæ”¾ç½®èˆ°èˆ¹
+        Set<String> occupiedSectors = new HashSet<>();  // å­˜å‚¨å·²å ç”¨çš„æ˜Ÿç³»
         for (Player player : players) {
             System.out.println("It's " + player.getName() + "'s turn to place ships.");
             player.placeShips(hexBoard, occupiedSectors);
-            occupationDisplay.displayOccupation(); // ¸üĞÂÏÔÊ¾Õ¼ÁìÇé¿ö
+            occupationDisplay.displayOccupation(); // æ›´æ–°æ˜¾ç¤ºå é¢†æƒ…å†µ
         }
 
-        // ÄæÊ±Õë·ÅÖÃ½¢´¬
+        // é€†æ—¶é’ˆæ”¾ç½®èˆ°èˆ¹
         for (int i = players.size() - 1; i >= 0; i--) {
             Player player = players.get(i);
             System.out.println("It's " + player.getName() + "'s turn to place ships.");
             player.placeShips(hexBoard, occupiedSectors);
-            occupationDisplay.displayOccupation(); // ¸üĞÂÏÔÊ¾Õ¼ÁìÇé¿ö
+            occupationDisplay.displayOccupation(); // æ›´æ–°æ˜¾ç¤ºå é¢†æƒ…å†µ
         }
         
         summarizeShipPlacement();
 
         System.out.println("Game started. It's " + startPlayer.getName() + "'s turn.");
-        nextTurn();  // ¿ªÊ¼µÚÒ»»ØºÏµÄÖ´ĞĞ
-        scoreManager.calculateRoundScores(); // ¿ªÊ¼ÓÎÏ·Ê±¼ÆËãµÚÒ»ÂÖ·ÖÊı
+        nextTurn();  // å¼€å§‹ç¬¬ä¸€å›åˆçš„æ‰§è¡Œ
+        scoreManager.calculateRoundScores(); // å¼€å§‹æ¸¸æˆæ—¶è®¡ç®—ç¬¬ä¸€è½®åˆ†æ•°
     }
 
     public void nextTurn() {
         System.out.println("Turn " + turnCounter + " starts.");
-        // È·±£ÎªÃ¿¸öÍæ¼ÒÉèÖÃÃüÁîË³Ğò
+        // ç¡®ä¿ä¸ºæ¯ä¸ªç©å®¶è®¾ç½®å‘½ä»¤é¡ºåº
         for (Player player : players) {
             player.setCommandOrder();
             player.endTurn();
@@ -79,25 +79,25 @@ public class Game {
         for (int i = 0; i < 3; i++) {
             System.out.println(Arrays.toString(commandMatrix[i]));
         }
-        executeRound();  // ¿ªÊ¼Ö´ĞĞÃ¿¸öÍæ¼ÒµÄÃüÁî
-        scoreManager.calculateRoundScores(); // Ã¿¸ö»ØºÏ¼ÆËã·ÖÊı
-        scoreBoard.updateScores(); // ¸üĞÂ·ÖÊı°å
-        turnCounter++;  // »ØºÏ¼ÆÊı¼ÓÒ»
-        endRound();  // µ÷ÓÃendRound´¦Àí»ØºÏ½áÊøµÄÂß¼­
+        executeRound();  // å¼€å§‹æ‰§è¡Œæ¯ä¸ªç©å®¶çš„å‘½ä»¤
+        scoreManager.calculateRoundScores(); // æ¯ä¸ªå›åˆè®¡ç®—åˆ†æ•°
+        scoreBoard.updateScores(); // æ›´æ–°åˆ†æ•°æ¿
+        turnCounter++;  // å›åˆè®¡æ•°åŠ ä¸€
+        endRound();  // è°ƒç”¨endRoundå¤„ç†å›åˆç»“æŸçš„é€»è¾‘
     }
 
     
     public void endRound() {
-        // ÏÔÊ¾²¢¼ÆËãµ±Ç°»ØºÏµÄµÃ·Ö
+        // æ˜¾ç¤ºå¹¶è®¡ç®—å½“å‰å›åˆçš„å¾—åˆ†
         calculateScores();
-        scoreManager.calculateRoundScores(); // ¼ÆËã²¢¸üĞÂÃ¿¸öÍæ¼ÒµÄ·ÖÊı
-        scoreBoard.updateScores(); // ¸üĞÂ·ÖÊı°åÏÔÊ¾
+        scoreManager.calculateRoundScores(); // è®¡ç®—å¹¶æ›´æ–°æ¯ä¸ªç©å®¶çš„åˆ†æ•°
+        scoreBoard.updateScores(); // æ›´æ–°åˆ†æ•°æ¿æ˜¾ç¤º
 
-        // ¼ì²éÊÇ·ñ´ïµ½ÁË×î´ó»ØºÏÊı
+        // æ£€æŸ¥æ˜¯å¦è¾¾åˆ°äº†æœ€å¤§å›åˆæ•°
         if (turnCounter >= maxTurns) {
-            endGame();  // Èç¹û´ïµ½×î´ó»ØºÏÊı£¬½áÊøÓÎÏ·
+            endGame();  // å¦‚æœè¾¾åˆ°æœ€å¤§å›åˆæ•°ï¼Œç»“æŸæ¸¸æˆ
         } else {
-            nextTurn();  // ·ñÔò£¬¿ªÊ¼ÏÂÒ»¸ö»ØºÏ
+            nextTurn();  // å¦åˆ™ï¼Œå¼€å§‹ä¸‹ä¸€ä¸ªå›åˆ
         }
     }
 
@@ -109,9 +109,9 @@ public class Game {
             System.out.println(player.getName() + " placed ships at the following locations:");
             Map<String, Map<Hex, List<String>>> shipPlacementSummary = new HashMap<>();
 
-            // ±éÀúÃ¿¸öÍæ¼ÒµÄ½¢´¬
+            // éå†æ¯ä¸ªç©å®¶çš„èˆ°èˆ¹
             for (Ship ship : player.getShips()) {
-                String sector = getSectorLabelForHex(ship.getShipLocation()); // »ñÈ¡¶ÔÓ¦µÄĞÇÏµÃû³Æ
+                String sector = getSectorLabelForHex(ship.getShipLocation()); // è·å–å¯¹åº”çš„æ˜Ÿç³»åç§°
                 Hex position = ship.getShipLocation();
                 String shipId = ship.getIdShip();
 
@@ -121,7 +121,7 @@ public class Game {
                 sectorMap.get(position).add(shipId);
             }
 
-            // Êä³öÍæ¼ÒµÄ½¢´¬·ÅÖÃĞÅÏ¢
+            // è¾“å‡ºç©å®¶çš„èˆ°èˆ¹æ”¾ç½®ä¿¡æ¯
             for (String sector : shipPlacementSummary.keySet()) {
                 Map<Hex, List<String>> sectorMap = shipPlacementSummary.get(sector);
                 for (Hex hex : sectorMap.keySet()) {
@@ -133,19 +133,19 @@ public class Game {
         }
     }
 
-    // »ñÈ¡Ä³¸ö×ø±êËùÊôµÄĞÇÏµ±êÇ©µÄ·½·¨
+    // è·å–æŸä¸ªåæ ‡æ‰€å±çš„æ˜Ÿç³»æ ‡ç­¾çš„æ–¹æ³•
     private String getSectorLabelForHex(Hex hex) {
-        // ±éÀúËùÓĞĞÇÏµ¿¨ÅÆ¼°Æä¶ÔÓ¦×ø±êÀ´ÕÒµ½Æ¥ÅäµÄĞÇÏµÃû³Æ
+        // éå†æ‰€æœ‰æ˜Ÿç³»å¡ç‰ŒåŠå…¶å¯¹åº”åæ ‡æ¥æ‰¾åˆ°åŒ¹é…çš„æ˜Ÿç³»åç§°
         Map<String, List<Hex>> cardHexes = hexBoard.generateCardHexes();
         for (Map.Entry<String, List<Hex>> entry : cardHexes.entrySet()) {
             if (entry.getValue().contains(hex)) {
                 return entry.getKey();
             }
         }
-        return "Unknown";  // ÕÒ²»µ½¶ÔÓ¦ĞÇÏµµÄÇé¿ö
+        return "Unknown";  // æ‰¾ä¸åˆ°å¯¹åº”æ˜Ÿç³»çš„æƒ…å†µ
     }
     
-    // ¸üĞÂ¾ØÕó
+    // æ›´æ–°çŸ©é˜µ
     public void updateCommandMatrix() {
         for (int i = 0; i < 3; i++) {
             Arrays.fill(commandMatrix[i], 0);
@@ -165,7 +165,7 @@ public class Game {
         }
     }
 
-    // »ñÈ¡ÌØ¶¨ÃüÁîÔÚÌØ¶¨ÂÖ´ÎµÄÊ¹ÓÃ´ÎÊı
+    // è·å–ç‰¹å®šå‘½ä»¤åœ¨ç‰¹å®šè½®æ¬¡çš„ä½¿ç”¨æ¬¡æ•°
     public int getCommandUsage(int round, int command) {
     	return commandMatrix[command - 1][round - 1];
     }
@@ -173,12 +173,11 @@ public class Game {
     
     public void executeRound() {
         System.out.println("Executing round for all players");
-        for (Player player : players) {
-            System.out.println("Now processing: " + player.getName());
-            List<Integer> commands = player.getCurrentCommandOrder();
-            for (Integer commandIndex : commands) {
-                System.out.println("Executing command for " + player.getName() + ": " + commandIndex);
-                executeCommands(player, commandIndex);
+        for (int commandPos = 0; commandPos < 3; commandPos++) { // å‘½ä»¤ä½ç½®ä»0åˆ°2ï¼Œå¯¹åº”äºæ¯ä½ç©å®¶çš„å‘½ä»¤1ã€2ã€3
+            for (Player player : players) {
+                int commandIndex = player.getCurrentCommandOrder().get(commandPos); // è·å–å½“å‰ç©å®¶æ­¤ä½ç½®çš„å‘½ä»¤ç´¢å¼•
+                System.out.println("Executing command " + commandIndex + " for " + player.getName());
+                executeCommands(player, commandIndex); // æ‰§è¡ŒæŒ‡å®šçš„å‘½ä»¤
             }
         }
     }
@@ -201,37 +200,37 @@ public class Game {
     }
 
     
-    //Î¬³Ö´¬Ö»
+    //ç»´æŒèˆ¹åª
     public void sustainShips() {
         Map<Hex, HexBoard.OccupationInfo> occupationMap = hexBoard.getOccupationMap();
 
-        // µü´úÃ¿¸öÁù±ßĞÎºÍËüµÄÕ¼ÁìĞÅÏ¢
+        // è¿­ä»£æ¯ä¸ªå…­è¾¹å½¢å’Œå®ƒçš„å é¢†ä¿¡æ¯
         Iterator<Map.Entry<Hex, HexBoard.OccupationInfo>> it = occupationMap.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<Hex, HexBoard.OccupationInfo> entry = it.next();
             Hex hex = entry.getKey();
             HexBoard.OccupationInfo occupationInfo = entry.getValue();
             Sector sector = hexBoard.getBoard().get(hex);
-            int maxShipsSustained = 1 + sector.getSector();  // ¼ÙÉègetSector()·µ»ØµÄÊÇÏµÍ³µÈ¼¶
+            int maxShipsSustained = 1 + sector.getSector();  // å‡è®¾getSector()è¿”å›çš„æ˜¯ç³»ç»Ÿç­‰çº§
 
             List<Ship> ships = occupationInfo.getOccupyingShips();
             if (ships.size() > maxShipsSustained) {
-                // Èç¹û½¢´¬ÊıÁ¿³¬³öÁË×î´óÎ¬³ÖÁ¿£¬½Ø¶ÏÁĞ±í
+                // å¦‚æœèˆ°èˆ¹æ•°é‡è¶…å‡ºäº†æœ€å¤§ç»´æŒé‡ï¼Œæˆªæ–­åˆ—è¡¨
                 List<Ship> toRemove = new ArrayList<>(ships.subList(maxShipsSustained, ships.size()));
-                ships.removeAll(toRemove);  // °²È«ÒÆ³ı³¬³ö²¿·ÖµÄ½¢´¬
-                // ´Ë´¦¿ÉÒÔ´¦Àí½¢´¬·µ»Øµ½¹©¸øÇøµÄÂß¼­
+                ships.removeAll(toRemove);  // å®‰å…¨ç§»é™¤è¶…å‡ºéƒ¨åˆ†çš„èˆ°èˆ¹
+                // æ­¤å¤„å¯ä»¥å¤„ç†èˆ°èˆ¹è¿”å›åˆ°ä¾›ç»™åŒºçš„é€»è¾‘
             }
 
-            // Èç¹ûÃ»ÓĞ½¢´¬Õ¼¾İ´ËÁù±ßĞÎ£¬Çå¿ÕÕ¼ÁìĞÅÏ¢
+            // å¦‚æœæ²¡æœ‰èˆ°èˆ¹å æ®æ­¤å…­è¾¹å½¢ï¼Œæ¸…ç©ºå é¢†ä¿¡æ¯
             if (ships.isEmpty()) {
-                it.remove();  // °²È«µØ´ÓÓ³ÉäÖĞÒÆ³ıµ±Ç°Ïî
-                hexBoard.clearOccupation(hex, null);  // ¼ÙÉèÕâ¸ö·½·¨¿ÉÒÔ´¦ÀíÇå³ıÕ¼Áì
+                it.remove();  // å®‰å…¨åœ°ä»æ˜ å°„ä¸­ç§»é™¤å½“å‰é¡¹
+                hexBoard.clearOccupation(hex, null);  // å‡è®¾è¿™ä¸ªæ–¹æ³•å¯ä»¥å¤„ç†æ¸…é™¤å é¢†
             }
         }
     }
 
 
-    //Íæ¼ÒÑ¡µÃ·ÖÉÈÇø
+    //ç©å®¶é€‰å¾—åˆ†æ‰‡åŒº
     public void chooseSectorCards() {
         List<String> availableCards = new ArrayList<>(Arrays.asList("a", "b", "c", "d", "e", "f", "g", "h"));
         Scanner scanner = new Scanner(System.in);
@@ -254,12 +253,12 @@ public class Game {
     public void calculateScores() {
         System.out.println("Scores for round " + turnCounter + ":");
         
-        // ÏÔÊ¾Ã¿Î»Íæ¼ÒÔÚÕâÒ»ÂÖµÄµÃ·Ö
+        // æ˜¾ç¤ºæ¯ä½ç©å®¶åœ¨è¿™ä¸€è½®çš„å¾—åˆ†
         for (Player player : players) {
             System.out.println("Player " + player.getName() + " scored " + player.getRoundScore() + " in round " + turnCounter);
         }
 
-        // ÏÔÊ¾ÓÎÏ·½øĞĞµ½Ä¿Ç°µÄ×Ü·Ö
+        // æ˜¾ç¤ºæ¸¸æˆè¿›è¡Œåˆ°ç›®å‰çš„æ€»åˆ†
         System.out.println("Total scores after " + turnCounter + " rounds:");
         for (Player player : players) {
             System.out.println("Player " + player.getName() + ": " + player.getScore());
@@ -276,11 +275,11 @@ public class Game {
         int highestScore = players.stream()
                                   .mapToInt(Player::getScore)
                                   .max()
-                                  .orElse(Integer.MIN_VALUE);  // ÕÒ³ö×î¸ßµÃ·Ö
+                                  .orElse(Integer.MIN_VALUE);  // æ‰¾å‡ºæœ€é«˜å¾—åˆ†
 
         List<Player> winners = players.stream()
                                       .filter(p -> p.getScore() == highestScore)
-                                      .collect(Collectors.toList());  // ÕÒ³öËùÓĞµÃ·Ö×î¸ßµÄÍæ¼Ò
+                                      .collect(Collectors.toList());  // æ‰¾å‡ºæ‰€æœ‰å¾—åˆ†æœ€é«˜çš„ç©å®¶
 
         if (winners.size() == 1) {
             System.out.println("The winner is " + winners.get(0).getName() + " with a score of " + highestScore + "!");
@@ -346,16 +345,16 @@ public class Game {
     
     //main
     public static void main(String[] args) {
-        // ³õÊ¼»¯Íæ¼ÒÁĞ±í
+        // åˆå§‹åŒ–ç©å®¶åˆ—è¡¨
         List<Player> players = new ArrayList<>();
         System.out.println("Welcome to the game! Please enter player details.");
 
-        // ´´½¨Ò»¸öÁÙÊ±µÄ Game ¶ÔÏó£¬ÓÃÓÚ´«µİ¸ø Player µÄ¹¹Ôìº¯Êı
-        Game tempGame = new Game(9, null, players);  // ³õÊ¼Ê±Ã»ÓĞ startPlayer£¬ÔİÊ±´« null
+        // åˆ›å»ºä¸€ä¸ªä¸´æ—¶çš„ Game å¯¹è±¡ï¼Œç”¨äºä¼ é€’ç»™ Player çš„æ„é€ å‡½æ•°
+        Game tempGame = new Game(9, null, players);  // åˆå§‹æ—¶æ²¡æœ‰ startPlayerï¼Œæš‚æ—¶ä¼  null
 
         Set<Integer> availableIds = new HashSet<>(Arrays.asList(1, 2, 3));
 
-        // ÌáÊ¾ÓÃ»§ÊäÈëÍæ¼ÒÊıÁ¿£¨2 »ò 3£©
+        // æç¤ºç”¨æˆ·è¾“å…¥ç©å®¶æ•°é‡ï¼ˆ2 æˆ– 3ï¼‰
         Scanner scanner = new Scanner(System.in);
         int numPlayers = 0;
         while (numPlayers < 2 || numPlayers > 3) {
@@ -377,17 +376,17 @@ public class Game {
             int id = getAvailableId(availableIds, scanner);
 
             if (name.equalsIgnoreCase("VirtualPlayer")) {
-                // ´´½¨ VirtualPlayer
+                // åˆ›å»º VirtualPlayer
                 VirtualPlayer virtualPlayer = new VirtualPlayer("VirtualPlayer" + id, id, tempGame);
                 players.add(virtualPlayer);
             } else {
-                // ´´½¨ÆÕÍ¨Íæ¼Ò
+                // åˆ›å»ºæ™®é€šç©å®¶
                 Player player = new Player(name, id, tempGame);
                 players.add(player);
             }
         }
 
-        // ×Ô¶¯Ìí¼ÓĞéÄâÍæ¼Ò£¬Ö±µ½Íæ¼ÒÊıÁ¿´ïµ½3ÈË
+        // è‡ªåŠ¨æ·»åŠ è™šæ‹Ÿç©å®¶ï¼Œç›´åˆ°ç©å®¶æ•°é‡è¾¾åˆ°3äºº
         while (players.size() < 3) {
             int id = availableIds.iterator().next();
             availableIds.remove(id);
@@ -396,7 +395,7 @@ public class Game {
             System.out.println("Added VirtualPlayer" + id + " to the game.");
         }
 
-        // ²éÕÒ ID Îª 1 µÄÍæ¼Ò×÷Îª¿ªÊ¼Íæ¼Ò
+        // æŸ¥æ‰¾ ID ä¸º 1 çš„ç©å®¶ä½œä¸ºå¼€å§‹ç©å®¶
         Player startPlayer = players.stream()
                 .filter(p -> p.getId() == 1)
                 .findFirst()
@@ -404,20 +403,20 @@ public class Game {
 
         if (startPlayer == null) {
             System.out.println("No player with ID 1 found, please ensure one of the players has ID 1.");
-            return; // Èç¹ûÃ»ÓĞÕÒµ½ ID Îª 1 µÄÍæ¼Ò£¬½áÊø³ÌĞò
+            return; // å¦‚æœæ²¡æœ‰æ‰¾åˆ° ID ä¸º 1 çš„ç©å®¶ï¼Œç»“æŸç¨‹åº
         }
 
-        // Ê¹ÓÃÕıÈ·µÄ¿ªÊ¼Íæ¼ÒÖØĞÂ´´½¨ Game ÊµÀı
+        // ä½¿ç”¨æ­£ç¡®çš„å¼€å§‹ç©å®¶é‡æ–°åˆ›å»º Game å®ä¾‹
         Game game = new Game(9, startPlayer, players);
-        game.startGame();  // ¿ªÊ¼ÓÎÏ·Âß¼­
+        game.startGame();  // å¼€å§‹æ¸¸æˆé€»è¾‘
 
-        // Ä£ÄâÓÎÏ·µÄ»ØºÏ½øĞĞ
+        // æ¨¡æ‹Ÿæ¸¸æˆçš„å›åˆè¿›è¡Œ
         while (game.getTurnCounter() <= game.getMaxTurns()) {
             game.nextTurn();
         }
     }
 
-    // »ñÈ¡¿ÉÓÃµÄÍæ¼Ò ID
+    // è·å–å¯ç”¨çš„ç©å®¶ ID
     private static int getAvailableId(Set<Integer> availableIds, Scanner scanner) {
         int id = 0;
         while (id == 0) {
