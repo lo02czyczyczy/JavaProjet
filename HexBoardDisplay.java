@@ -10,9 +10,10 @@ public class HexBoardDisplay extends JFrame {
     public HexBoardDisplay(HexBoard hexBoard) {
         this.board = hexBoard.getBoard();
         setTitle("Hex Board Visualization");
-        setSize(700, 600);  // µ÷Õû´°¿Ú³ß´ç£¬Ôö¼Ó¿í¶ÈÒÔÏÔÊ¾×¢ÊÍ
+        setSize(700, 600);  
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);  // ¾ÓÖĞÏÔÊ¾´°¿Ú
+        setLocation(0, 0);  // è®¾ç½®ä½ç½®åœ¨å±å¹•å·¦ä¸Šè§’
+        setAlwaysOnTop(true);  // çª—å£å§‹ç»ˆåœ¨æœ€å‰é¢
     }
 
     @Override
@@ -20,17 +21,17 @@ public class HexBoardDisplay extends JFrame {
         super.paint(g);
         Graphics2D g2d = (Graphics2D) g;
 
-        // ÆôÓÃ¿¹¾â³İ
+        // å¯ç”¨æŠ—é”¯é½¿
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         drawHexBoard(g2d);
-        drawLegend(g2d);  // »æÖÆ×¢ÊÍ
+        drawLegend(g2d);  // ç»˜åˆ¶æ³¨é‡Š
     }
 
     private void drawHexBoard(Graphics g) {
-        int size = 30;  // Áù±ßĞÎµÄ´óĞ¡
-        int offsetX = getWidth() / 3;  // ÖĞĞÄÆ«ÒÆX£¬µ÷ÕûÎª´°¿Ú×ó²à
-        int offsetY = getHeight() / 2;  // ÖĞĞÄÆ«ÒÆY
+        int size = 30;  // å…­è¾¹å½¢çš„å¤§å°
+        int offsetX = getWidth() / 3;  // ä¸­å¿ƒåç§»Xï¼Œè°ƒæ•´ä¸ºçª—å£å·¦ä¾§
+        int offsetY = getHeight() / 2;  // ä¸­å¿ƒåç§»Y
 
         for (Map.Entry<Hex, Sector> entry : board.entrySet()) {
             Hex hex = entry.getKey();
@@ -52,11 +53,11 @@ public class HexBoardDisplay extends JFrame {
             cy[i] = (int) (y + size * Math.sin(i * Math.PI / 3));
         }
 
-        // »æÖÆÁù±ßĞÎ
+        // ç»˜åˆ¶å…­è¾¹å½¢
         g.setColor(Color.BLACK);
         g.drawPolygon(cx, cy, 6);
 
-        // ¸ù¾İĞÇÇøµÈ¼¶Ìî³äÑÕÉ«
+        // æ ¹æ®æ˜ŸåŒºç­‰çº§å¡«å……é¢œè‰²
         Color color;
         switch (level) {
             case 0: color = Color.LIGHT_GRAY; break;
@@ -68,19 +69,19 @@ public class HexBoardDisplay extends JFrame {
         g.setColor(color);
         g.fillPolygon(cx, cy, 6);
 
-        // ÔÚÁù±ßĞÎÖĞĞÄ»æÖÆ×ø±ê
-        g.setColor(Color.WHITE);  // °×É«ÎÄ×Ö
+        // åœ¨å…­è¾¹å½¢ä¸­å¿ƒç»˜åˆ¶åæ ‡
+        g.setColor(Color.WHITE);  // ç™½è‰²æ–‡å­—
         String coord = String.format("(%d,%d,%d)", hex.q, hex.r, hex.s);
         g.drawString(coord, x - g.getFontMetrics().stringWidth(coord) / 2, y + 5);
     }
 
-    // »æÖÆÓÒ²àµÄ×¢ÊÍĞÅÏ¢
+    // ç»˜åˆ¶å³ä¾§çš„æ³¨é‡Šä¿¡æ¯
     private void drawLegend(Graphics g) {
-        int legendX = getWidth() - 250;  // ×¢ÊÍÎ»ÖÃµÄX×ø±ê
-        int legendY = 100;  // ×¢ÊÍÆğÊ¼Î»ÖÃµÄY×ø±ê
-        int boxSize = 30;  // É«¿éµÄ´óĞ¡
+        int legendX = getWidth() - 250;  // æ³¨é‡Šä½ç½®çš„Xåæ ‡
+        int legendY = 100;  // æ³¨é‡Šèµ·å§‹ä½ç½®çš„Yåæ ‡
+        int boxSize = 30;  // è‰²å—çš„å¤§å°
 
-        // »æÖÆÃ¿¸öĞÇÇøµÈ¼¶µÄ×¢ÊÍ
+        // ç»˜åˆ¶æ¯ä¸ªæ˜ŸåŒºç­‰çº§çš„æ³¨é‡Š
         g.setColor(Color.BLACK);
         g.drawString("Sector Levels:", legendX, legendY - 20);
 
