@@ -16,60 +16,65 @@ public class ScoreBoard {
         initUI();
     }
 
-    // ³õÊ¼»¯ÓÃ»§½çÃæ
+    // åˆå§‹åŒ–ç”¨æˆ·ç•Œé¢
     private void initUI() {
-        frame = new JFrame("Game Scoreboard");
+    	frame = new JFrame("Game Scoreboard");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(600, 400);
+        frame.setSize(400, 100);  // å®½åº¦å˜çª„
         frame.setLayout(new BorderLayout());
 
-        // ³õÊ¼»¯±í¸ñÄ£ĞÍ£¬´´½¨ÁĞ±êÌâ£ºµÚÒ»ÁĞÎª»ØºÏÊı£¬Ê£ÏÂµÄÁĞÎªÍæ¼ÒĞÕÃû
+        // ä½¿çª—å£å‡ºç°åœ¨å±å¹•é¡¶éƒ¨ä¸­é—´
+        frame.setLocationRelativeTo(null);
+        frame.setLocation(frame.getX(), 0);
+        frame.setAlwaysOnTop(true);  // çª—å£å§‹ç»ˆåœ¨æœ€å‰é¢
+
+        // åˆå§‹åŒ–è¡¨æ ¼æ¨¡å‹ï¼Œåˆ›å»ºåˆ—æ ‡é¢˜ï¼šç¬¬ä¸€åˆ—ä¸ºå›åˆæ•°ï¼Œå‰©ä¸‹çš„åˆ—ä¸ºç©å®¶å§“å
         tableModel = new DefaultTableModel();
         tableModel.addColumn("Round");
 
-        // Ìí¼ÓÍæ¼ÒĞÕÃû×÷ÎªÁĞ±êÌâ
+        // æ·»åŠ ç©å®¶å§“åä½œä¸ºåˆ—æ ‡é¢˜
         for (Player player : scoreManager.getPlayers()) {
             tableModel.addColumn(player.getName());
         }
 
-        // ´´½¨±í¸ñ²¢ÉèÖÃ±í¸ñÄ£ĞÍ
+        // åˆ›å»ºè¡¨æ ¼å¹¶è®¾ç½®è¡¨æ ¼æ¨¡å‹
         scoreTable = new JTable(tableModel);
         JScrollPane scrollPane = new JScrollPane(scoreTable);
         frame.add(scrollPane, BorderLayout.CENTER);
 
-        // ÏÔÊ¾´°¿Ú
+        // æ˜¾ç¤ºçª—å£
         frame.setVisible(true);
     }
 
- // ¸üĞÂ±í¸ñÄÚÈİ
+ // æ›´æ–°è¡¨æ ¼å†…å®¹
     public void updateScores() {
-        tableModel.setRowCount(0); // Çå¿Õ¾ÉÊı¾İ
+        tableModel.setRowCount(0); // æ¸…ç©ºæ—§æ•°æ®
 
-        // »ñÈ¡×î´ó»ØºÏÊı
+        // è·å–æœ€å¤§å›åˆæ•°
         int maxRounds = scoreManager.getGame().getTurnCounter();
 
-        // °´ÕÕ»ØºÏ¸üĞÂ±í¸ñÄÚÈİ
+        // æŒ‰ç…§å›åˆæ›´æ–°è¡¨æ ¼å†…å®¹
         for (int round = 1; round <= maxRounds; round++) {
             Object[] rowData = new Object[tableModel.getColumnCount()];
-            rowData[0] = "Round " + round; // µÚÒ»ÁĞÊÇ»ØºÏºÅ
+            rowData[0] = "Round " + round; // ç¬¬ä¸€åˆ—æ˜¯å›åˆå·
 
-            // ±éÀúËùÓĞÍæ¼Ò£¬»ñÈ¡¸Ã»ØºÏµÄ·ÖÊı
-            int columnIndex = 1; // ´ÓµÚ2ÁĞ¿ªÊ¼Ìî³äÍæ¼ÒµÃ·Ö
+            // éå†æ‰€æœ‰ç©å®¶ï¼Œè·å–è¯¥å›åˆçš„åˆ†æ•°
+            int columnIndex = 1; // ä»ç¬¬2åˆ—å¼€å§‹å¡«å……ç©å®¶å¾—åˆ†
             for (Player player : scoreManager.getPlayers()) {
                 Integer score = scoreManager.getRoundScores(player.getId()).get(round);
                 if (score != null) {
                     rowData[columnIndex] = score;
                 } else {
-                    rowData[columnIndex] = "-"; // Èç¹ûÃ»ÓĞ·ÖÊıÔòÏÔÊ¾ "-"
+                    rowData[columnIndex] = "-"; // å¦‚æœæ²¡æœ‰åˆ†æ•°åˆ™æ˜¾ç¤º "-"
                 }
                 columnIndex++;
             }
 
-            // Ìí¼ÓĞĞÊı¾İµ½±í¸ñÖĞ
+            // æ·»åŠ è¡Œæ•°æ®åˆ°è¡¨æ ¼ä¸­
             tableModel.addRow(rowData);
         }
 
-        // Ìí¼Ó×îÖÕµÃ·ÖĞĞ
+        // æ·»åŠ æœ€ç»ˆå¾—åˆ†è¡Œ
         Object[] finalScoreRow = new Object[tableModel.getColumnCount()];
         finalScoreRow[0] = "Final";
         int columnIndex = 1;
@@ -77,7 +82,7 @@ public class ScoreBoard {
             finalScoreRow[columnIndex] = scoreManager.getFinalScore(player.getId());
             columnIndex++;
         }
-        tableModel.addRow(finalScoreRow); // Ìí¼Ó×îÖÕµÃ·ÖĞĞ
+        tableModel.addRow(finalScoreRow); // æ·»åŠ æœ€ç»ˆå¾—åˆ†è¡Œ
     }
 
 }
