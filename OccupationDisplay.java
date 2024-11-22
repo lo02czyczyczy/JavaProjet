@@ -22,9 +22,10 @@ public class OccupationDisplay {
     private void initializeUI() {
         frame = new JFrame("Occupation Details");
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.setSize(600, 400); // ÉèÖÃ´°¿Ú´óĞ¡
-        frame.setLayout(new BorderLayout());
-        
+        frame.setSize(600, 1000); // ç›´æ¥è®¾ç½®çª—å£çš„å®½åº¦å’Œé«˜åº¦
+        frame.setLocation(1100, 30); // ç›´æ¥è®¾ç½®çª—å£åœ¨å±å¹•çš„ä½ç½®
+        frame.setAlwaysOnTop(true); // çª—å£å§‹ç»ˆåœ¨æœ€å‰é¢
+
         JTextArea textArea = new JTextArea(20, 50);
         textArea.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(textArea);
@@ -34,42 +35,42 @@ public class OccupationDisplay {
     public void displayOccupation() {
         StringBuilder display = new StringBuilder();
 
-        // »ñÈ¡ËùÓĞµÄ Hex ºÍ¶ÔÓ¦µÄ OccupationInfo
+        // è·å–æ‰€æœ‰çš„ Hex å’Œå¯¹åº”çš„ OccupationInfo
         Map<Hex, HexBoard.OccupationInfo> occupationMap = hexBoard.getOccupationMap();
         Map<Hex, Sector> allHexes = hexBoard.getBoard();
 
-        // ¹¹½¨Ò»¸ö Map£¬ÒÔ¿¨ÅÆ±êÇ©Îª¼ü£¬ÖµÎª¸Ã¿¨ÅÆÏÂµÄ Hex ÁĞ±í
+        // æ„å»ºä¸€ä¸ª Mapï¼Œä»¥å¡ç‰Œæ ‡ç­¾ä¸ºé”®ï¼Œå€¼ä¸ºè¯¥å¡ç‰Œä¸‹çš„ Hex åˆ—è¡¨
         Map<String, List<Hex>> cardHexesMap = new HashMap<>();
 
-        // Ê×ÏÈ£¬´¦ÀíËùÓĞµÄ Hex£¬ÕÒµ½ËüÃÇµÄ¿¨ÅÆ±êÇ©£¬²¢½øĞĞ·Ö×é
+        // é¦–å…ˆï¼Œå¤„ç†æ‰€æœ‰çš„ Hexï¼Œæ‰¾åˆ°å®ƒä»¬çš„å¡ç‰Œæ ‡ç­¾ï¼Œå¹¶è¿›è¡Œåˆ†ç»„
         for (Hex hex : allHexes.keySet()) {
             String cardLabel = findCardLabelForHex(hex);
             cardHexesMap.computeIfAbsent(cardLabel, k -> new ArrayList<>()).add(hex);
         }
 
-        // ¶Ô¿¨ÅÆ±êÇ©½øĞĞÅÅĞò
+        // å¯¹å¡ç‰Œæ ‡ç­¾è¿›è¡Œæ’åº
         List<String> sortedCardLabels = new ArrayList<>(cardHexesMap.keySet());
         Collections.sort(sortedCardLabels);
 
-        // ÌØÊâ´¦Àí Tri-Prime ºÍ Boundary£¬Ê¹ÆäÔÚÁĞ±íµÄ¿ªÍ·»ò½áÎ²
+        // ç‰¹æ®Šå¤„ç† Tri-Prime å’Œ Boundaryï¼Œä½¿å…¶åœ¨åˆ—è¡¨çš„å¼€å¤´æˆ–ç»“å°¾
         sortedCardLabels.remove("Tri-Prime");
         sortedCardLabels.remove("Boundary");
         sortedCardLabels.add(0, "Tri-Prime");
         sortedCardLabels.add("Boundary");
 
-        // °´ÕÕÅÅĞòºóµÄ¿¨ÅÆ±êÇ©£¬ÖğÒ»´¦Àí
+        // æŒ‰ç…§æ’åºåçš„å¡ç‰Œæ ‡ç­¾ï¼Œé€ä¸€å¤„ç†
         for (String cardLabel : sortedCardLabels) {
             List<Hex> hexes = cardHexesMap.get(cardLabel);
 
-            // ¶Ô Hex ÁĞ±í°´ÕÕ×ø±êÅÅĞò
+            // å¯¹ Hex åˆ—è¡¨æŒ‰ç…§åæ ‡æ’åº
             hexes.sort(Comparator.comparingInt((Hex h) -> h.q)
                     .thenComparingInt(h -> h.r)
                     .thenComparingInt(h -> h.s));
 
-            // Êä³ö¿¨ÅÆ±êÇ©
+            // è¾“å‡ºå¡ç‰Œæ ‡ç­¾
             display.append("=== ").append(cardLabel).append(" ===\n");
 
-            // ÖğÒ»Êä³ö¸Ã¿¨ÅÆÏÂµÄ Hex ĞÅÏ¢
+            // é€ä¸€è¾“å‡ºè¯¥å¡ç‰Œä¸‹çš„ Hex ä¿¡æ¯
             for (Hex hex : hexes) {
                 HexBoard.OccupationInfo info = occupationMap.get(hex);
                 display.append(formatOccupationInfo(cardLabel, hex, info)).append("\n");
@@ -81,9 +82,9 @@ public class OccupationDisplay {
         EventQueue.invokeLater(() -> frame.setVisible(true));
     }
 
-    // ĞŞ¸Ä findCardLabelForHex ·½·¨
+    // ä¿®æ”¹ findCardLabelForHex æ–¹æ³•
     private String findCardLabelForHex(Hex hex) {
-        // Ê×ÏÈ¼ì²éÊÇ·ñÊÇ Tri-Prime ÇøÓò
+        // é¦–å…ˆæ£€æŸ¥æ˜¯å¦æ˜¯ Tri-Prime åŒºåŸŸ
         if (isTriPrimeHex(hex)) {
             return "Tri-Prime";
         }
@@ -97,10 +98,10 @@ public class OccupationDisplay {
                 return cardLabel;
             }
         }
-        return "Boundary"; // Èç¹û²»ÔÚÈÎºÎ¿¨ÅÆÖĞ£¬Ôò±ê¼ÇÎª±ß½ç
+        return "Boundary"; // å¦‚æœä¸åœ¨ä»»ä½•å¡ç‰Œä¸­ï¼Œåˆ™æ ‡è®°ä¸ºè¾¹ç•Œ
     }
 
-    // ÅĞ¶ÏÊÇ·ñÎª Tri-Prime ÇøÓò
+    // åˆ¤æ–­æ˜¯å¦ä¸º Tri-Prime åŒºåŸŸ
     private boolean isTriPrimeHex(Hex hex) {
         List<Hex> triPrimeHexes = Arrays.asList(
             new Hex(0, 0, 0),
@@ -114,22 +115,22 @@ public class OccupationDisplay {
     private String formatOccupationInfo(String cardLabel, Hex hex, HexBoard.OccupationInfo info) {
         StringBuilder sb = new StringBuilder();
         sb.append("Hex ").append(hex)
-          .append("£¬sector ").append(hexBoard.getBoard().get(hex).getSector());
+          .append("ï¼Œsector ").append(hexBoard.getBoard().get(hex).getSector());
 
         if (info != null && info.getNumberOfShips() > 0) {
-            sb.append("£¬Occupied by player ").append(info.getPlayerId())
-              .append("£¬Ships: ");
+            sb.append("ï¼ŒOccupied by player ").append(info.getPlayerId())
+              .append("ï¼ŒShips: ");
 
             List<Ship> ships = info.getOccupyingShips();
             for (Ship ship : ships) {
                 sb.append(ship.getIdShip()).append(", ");
             }
 
-            sb.setLength(sb.length() - 2); // É¾³ı×îºóÒ»¸ö¶ººÅºÍ¿Õ¸ñ
+            sb.setLength(sb.length() - 2); // åˆ é™¤æœ€åä¸€ä¸ªé€—å·å’Œç©ºæ ¼
 
-            sb.append("£¬Number of ships: ").append(info.getNumberOfShips());
+            sb.append("ï¼ŒNumber of ships: ").append(info.getNumberOfShips());
         } else {
-            sb.append("£¬Unoccupied");
+            sb.append("ï¼ŒUnoccupied");
         }
 
         return sb.toString();
