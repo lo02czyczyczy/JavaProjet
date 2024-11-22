@@ -228,28 +228,58 @@ public class Player {
         hexBoard.getOccupationMap().forEach((hex, occupationInfo) -> {
             if (occupationInfo.getPlayerId() == this.id) {
                 controlledHexes.add(hex);
-                System.out.println("Controlled hex: " + hex + ", Number of ships: " + occupationInfo.getOccupyingShips().size());
             }
         });
 
-        // 提示玩家选择在哪些系统中放置新的舰船
-        System.out.println("You can distribute " + shipsToAdd + " ships among the controlled hexes.");
-        int shipsPlaced = 0;
-        Scanner scanner = new Scanner(System.in);
+        System.out.println("You control the following hexes:");
+        for (Hex hex : controlledHexes) {
+            System.out.println("Controlled hex: " + hex);
+        }
 
+        System.out.println("You can distribute " + shipsToAdd + " ships among the controlled hexes or type 'skip' to skip adding ships.");
+        // 使用类中共享的 scanner
         while (shipsToAdd > 0) {
-            System.out.println("Enter hex coordinates and number of ships to add (e.g., 0 0 0 2 to add 2 ships at (0,0,0)):");
+            System.out.println("Enter hex coordinates (q r s) and number of ships to add, e.g., '0 0 0 2', or type 'skip':");
             String input = scanner.nextLine();
-            String[] parts = input.split(" ");
+            if (input.equalsIgnoreCase("skip")) {
+                System.out.println("Skipping ship addition for this round.");
+                break;
+            }
+            String[] parts = input.trim().split("\\s+");
+            if (parts.length != 4) {
+                System.out.println("Invalid input. Please enter three coordinates and a number.");
+                continue;
+            }
             try {
                 int q = Integer.parseInt(parts[0]);
                 int r = Integer.parseInt(parts[1]);
                 int s = Integer.parseInt(parts[2]);
                 int count = Integer.parseInt(parts[3]);
-                
+
+                if (q + r + s != 0) {
+                    System.out.println("Invalid coordinates. q + r + s must equal 0.");
+                    continue;
+                }
+
+                if (count <= 0) {
+                    System.out.println("Invalid ship count. Must be greater than 0.");
+                    continue;
+                }
+
                 Hex targetHex = new Hex(q, r, s);
-                if (controlledHexes.contains(targetHex) && count <= shipsToAdd && count > 0) {
-                    // Add ships to the specified hex
+                System.out.println("You entered hex: " + targetHex);
+
+                // 直接比较 q, r, s 值
+                boolean controlsHex = false;
+                for (Hex hex : controlledHexes) {
+                    if (hex.q == targetHex.q && hex.r == targetHex.r && hex.s == targetHex.s) {
+                        controlsHex = true;
+                        break;
+                    }
+                }
+
+                if (controlsHex && count <= shipsToAdd) {
+                    // 添加舰船到指定的 hex
                     for (int i = 0; i < count; i++) {
                         Ship newShip = new Ship(this, hexBoard.getBoard().get(targetHex), targetHex, generateShipId(ships.size() + 1));
                         ships.add(newShip);
@@ -260,20 +290,30 @@ public class Player {
                 } else {
                     System.out.println("Invalid hex or ship count. Make sure the hex is controlled and the ship count is correct.");
                 }
-            } catch (Exception e) {
-                System.out.println("Invalid input. Please enter valid hex coordinates and a number.");
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter valid integers for coordinates and ship count.");
             }
         }
 
-        System.out.println("All ships placed for this round.");
+        System.out.println("All ships placed or skipped for this round.");
         System.out.println("**************************************************************************************************************************");
     }
 
 
+
+    
+    
+    
+    
+    
+    
+    
+    
+
     //EXPLORE卡牌
     public void explore(Game game) {
-    	int round = currentCommandOrder.indexOf(2) + 1;
-        int usage = game.getCommandUsage(round,2); // 从Game获取该轮explore命令的使用次数
+        int round = currentCommandOrder.indexOf(2) + 1;
+        int usage = game.getCommandUsage(round, 2); // 从Game获取该轮explore命令的使用次数
 
         int movesPerShip = Math.max(4 - usage, 1); // 每艘船的可移动次数
         System.out.println(name + " can move each ship " + movesPerShip + " times using Explore command in round " + round);
@@ -286,54 +326,152 @@ public class Player {
 
         // 玩家选择飞船和移动操作
         for (Ship ship : ships) {
-            System.out.println("Move Ship ID: " + ship.getIdShip() + " at Hex coordinates " + ship.getShipLocation());
+            int remainingMoves = movesPerShip;
+            Hex currentHex = ship.getShipLocation();
 
-            for (int i = 0; i < movesPerShip; i++) {
-                System.out.println("Enter new coordinates for move " + (i+1) + " (or skip):");
+            System.out.println("Move Ship ID: " + ship.getIdShip() + " starting at Hex coordinates " + currentHex);
+
+            while (remainingMoves > 0) {
+                System.out.println("Enter new coordinates for move (or type 'skip'):");
                 String input = scanner.nextLine();
                 if (input.equalsIgnoreCase("skip")) {
                     break; // 跳过此船的移动
                 }
 
-                String[] parts = input.split(" ");
+                String[] parts = input.trim().split("\\s+");
+                if (parts.length != 3) {
+                    System.out.println("Invalid input. Please enter three coordinates.");
+                    continue;
+                }
+
                 try {
                     int q = Integer.parseInt(parts[0]);
                     int r = Integer.parseInt(parts[1]);
                     int s = Integer.parseInt(parts[2]);
+
+                    if (q + r + s != 0) {
+                        System.out.println("Invalid coordinates. q + r + s must equal 0.");
+                        continue;
+                    }
+
                     Hex targetHex = new Hex(q, r, s);
 
-                    // 检查目标Hex是否为有效移动选项
-                    if (isValidMove(ship.getShipLocation(), targetHex)) {
+                    if (isValidMove(currentHex, targetHex, remainingMoves)) {
+                        // 移动船只
                         ship.move(targetHex, hexBoard.getBoard().get(targetHex)); // 移动船只
                         hexBoard.updateOccupation(targetHex, ship); // 更新占领信息
-                        hexBoard.clearOccupation(ship.getShipLocation(), ship); // 清除原位置的占领信息
+                        hexBoard.clearOccupation(currentHex, ship); // 清除原位置的占领信息
+
+                        currentHex = targetHex; // 更新当前坐标
+                        remainingMoves--;
+
+                        System.out.println("Ship moved to " + targetHex);
+
+                        // 如果进入了Tri-Prime系统六边形，必须停止移动
+                        if (isTriPrimeHex(targetHex)) {
+                            System.out.println("Ship has entered Tri-Prime system hex and must stop moving.");
+                            break;
+                        }
                     } else {
-                        System.out.println("Invalid move. Hex occupied by other player or out of reach.");
+                        System.out.println("Invalid move. Cannot move to the specified hex.");
                     }
-                } catch (Exception e) {
-                    System.out.println("Invalid input. Please enter valid hex coordinates.");
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid input. Please enter valid integers for coordinates.");
                 }
             }
         }
         System.out.println("**************************************************************************************************************************");
     }
 
-    private boolean isValidMove(Hex from, Hex to) {
-        // 检查是否相邻以及目标hex是否被其他玩家占领
-        if (from.isNeighbor(to) && hexBoard.getOccupationInfo(to) == null) {
-            return true;
-        } else {
+
+    private boolean isValidMove(Hex from, Hex to, int remainingMoves) {
+        // 检查是否相邻
+        if (!from.isNeighbor(to)) {
+            System.out.println("Target hex is not adjacent.");
             return false;
         }
+
+        // 检查目标hex是否被其他玩家占领
+        HexBoard.OccupationInfo occupationInfo = hexBoard.getOccupationInfo(to);
+        if (occupationInfo != null && occupationInfo.getPlayerId() != this.id) {
+            System.out.println("Cannot move to a hex occupied by another player.");
+            return false;
+        }
+
+        // 检查是否是边缘的“半个”六边形格（sector等级为0）
+        if (hexBoard.getBoard().get(to).getSector() == 0) {
+            System.out.println("Cannot move to an invalid hex.");
+            return false;
+        }
+
+        // 检查是否经过了Tri-Prime系统六边形
+        boolean fromIsTriPrime = isTriPrimeHex(from);
+        boolean toIsTriPrime = isTriPrimeHex(to);
+
+        if (toIsTriPrime) {
+            // 如果目标是Tri-Prime系统六边形，必须停止移动
+            if (remainingMoves > 1) {
+                System.out.println("Must stop moving after entering Tri-Prime system hex.");
+                return false;
+            }
+        } else if (fromIsTriPrime) {
+            // 从Tri-Prime系统六边形移动出来，正常处理
+            // 不需要特殊处理
+        } else if (isMovingThroughTriPrime(from, to)) {
+            // 如果是在同一移动中试图经过Tri-Prime系统六边形，则不允许
+            System.out.println("Cannot move through Tri-Prime system hex.");
+            return false;
+        }
+
+        return true;
     }
+
+    // 检查是否为Tri-Prime系统六边形
+    private boolean isTriPrimeHex(Hex hex) {
+        List<Hex> triPrimeHexes = Arrays.asList(
+            new Hex(0, 0, 0),
+            new Hex(1, -1, 0),
+            new Hex(0, -1, 1),
+            new Hex(1, 0, -1)
+        );
+        for (Hex triHex : triPrimeHexes) {
+            if (hex.q == triHex.q && hex.r == triHex.r && hex.s == triHex.s) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // 检查是否在同一移动中试图经过Tri-Prime系统六边形
+    private boolean isMovingThroughTriPrime(Hex from, Hex to) {
+        // 获取from和to之间的所有可能路径（由于相邻，只需检查from和to是否都邻近Tri-Prime）
+        return isNeighborToTriPrime(from) && isNeighborToTriPrime(to);
+    }
+
+    // 检查一个hex是否邻近Tri-Prime系统六边形
+    private boolean isNeighborToTriPrime(Hex hex) {
+        for (Hex neighbor : hex.getNeighbors(hexBoard.getBoard())) {
+            if (isTriPrimeHex(neighbor)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    
+    
+    
+    
+    
+    
+    
 
 
     //EXTERMINATE卡牌
     public void exterminate(Game game) {
-    	int round = currentCommandOrder.indexOf(3) + 1;
-        int usage = game.getCommandUsage(round,3); // 从Game获取该轮exterminate命令的使用次数
-
-        int attacksAllowed = Math.max(4 - usage, 1); // 玩家的总进攻次数
+        int round = currentCommandOrder.indexOf(3) + 1;
+        int usage = game.getCommandUsage(round, 3);
+        int attacksAllowed = Math.max(4 - usage, 1);
         System.out.println(name + " has " + attacksAllowed + " total attacks using Exterminate command in round " + round);
 
         // 显示所有飞船及其位置
@@ -342,31 +480,47 @@ public class Player {
             System.out.println("Ship ID: " + ship.getIdShip() + " at Hex coordinates " + shipPosition);
         });
 
-        // 玩家选择飞船和进攻操作
+        // 玩家选择进攻操作
         while (attacksAllowed > 0) {
-            System.out.println("Select a ship and an adjacent hex to attack (or type 'skip' to end attacks):");
+            System.out.println("Enter ship ID and target hex coordinates to attack (e.g., '1 0 0 0') or type 'skip' to end attacks:");
             String input = scanner.nextLine();
             if (input.equalsIgnoreCase("skip")) {
                 break; // 玩家选择结束进攻
             }
 
-            String[] parts = input.split(" ");
+            String[] parts = input.trim().split("\\s+");
+            if (parts.length != 4) {
+                System.out.println("Invalid input. Please enter ship ID and three coordinates.");
+                continue;
+            }
+
             try {
                 int shipId = Integer.parseInt(parts[0]);
                 int q = Integer.parseInt(parts[1]);
                 int r = Integer.parseInt(parts[2]);
                 int s = Integer.parseInt(parts[3]);
+
+                if (q + r + s != 0) {
+                    System.out.println("Invalid coordinates. q + r + s must equal 0.");
+                    continue;
+                }
+
                 Ship attackingShip = findShipById(shipId);
+                if (attackingShip == null) {
+                    System.out.println("Invalid ship ID.");
+                    continue;
+                }
+
                 Hex targetHex = new Hex(q, r, s);
 
-                if (attackingShip != null && isValidAttack(attackingShip.getShipLocation(), targetHex)) {
+                if (isValidAttack(attackingShip.getShipLocation(), targetHex)) {
                     resolveAttack(attackingShip, targetHex); // 执行进攻
                     attacksAllowed--;
                 } else {
-                    System.out.println("Invalid attack. Check if target is adjacent and occupied by enemy ships.");
+                    System.out.println("Invalid attack. Cannot attack the specified hex.");
                 }
-            } catch (Exception e) {
-                System.out.println("Invalid input. Please enter valid ship ID and hex coordinates.");
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter valid integers for ship ID and hex coordinates.");
             }
         }
         System.out.println("All attacks have been executed.");
@@ -374,33 +528,88 @@ public class Player {
     }
 
     private Ship findShipById(int shipId) {
-        return ships.stream()
-                    .filter(ship -> Integer.parseInt(ship.getIdShip().split("-")[1]) == shipId)
-                    .findFirst()
-                    .orElse(null);
+        for (Ship ship : ships) {
+            // 假设 ship.getIdShip() 的格式为 "playerId-shipNumber"，例如 "1-1"
+            String[] idParts = ship.getIdShip().split("-");
+            if (idParts.length == 2) {
+                try {
+                    int id = Integer.parseInt(idParts[1]);
+                    if (id == shipId) {
+                        return ship;
+                    }
+                } catch (NumberFormatException e) {
+                    // 忽略格式不正确的 shipId
+                }
+            }
+        }
+        return null; // 未找到匹配的船只
     }
 
     private boolean isValidAttack(Hex from, Hex to) {
-        return from.isNeighbor(to) && hexBoard.getOccupationInfo(to) != null &&
-               hexBoard.getOccupationInfo(to).getPlayerId() != this.id;
+        if (!from.isNeighbor(to)) {
+            System.out.println("Target hex is not adjacent.");
+            return false;
+        }
+
+        HexBoard.OccupationInfo occupationInfo = hexBoard.getOccupationInfo(to);
+        if (occupationInfo == null) {
+            System.out.println("Cannot attack an unoccupied hex.");
+            return false;
+        }
+
+        if (occupationInfo.getPlayerId() == this.id) {
+            System.out.println("Cannot attack your own hex.");
+            return false;
+        }
+
+        return true;
     }
 
     private void resolveAttack(Ship attackingShip, Hex targetHex) {
-    	OccupationInfo targetInfo = hexBoard.getOccupationInfo(targetHex);
-        // Assume that both the attacker and the target lose one ship
-        if (targetInfo.getNumberOfShips() > 1) {
-            targetInfo.removeShip(targetInfo.getOccupyingShips().get(0)); // Remove one ship from target
-            System.out.println("One ship from " + targetHex + " has been destroyed.");
-        } else {
-            hexBoard.clearOccupation(targetHex, targetInfo.getOccupyingShips().get(0)); // Clear occupation if only one ship
-            System.out.println(targetHex + " is now unoccupied.");
+        OccupationInfo targetInfo = hexBoard.getOccupationInfo(targetHex);
+        List<Ship> defendingShips = targetInfo.getOccupyingShips();
+
+        // 移除防守方的一艘舰船
+        if (!defendingShips.isEmpty()) {
+            Ship shipToRemove = defendingShips.get(0);
+            defendingShips.remove(shipToRemove);
+            hexBoard.clearOccupation(targetHex, shipToRemove);
+            shipToRemove.getOwner().getShips().remove(shipToRemove); // 从防守方的舰船列表中移除
+            System.out.println("Defending ship " + shipToRemove.getIdShip() + " has been destroyed.");
         }
-        // Removing one ship of the attacker
+
+        // 移除攻击方的舰船
         ships.remove(attackingShip);
+        hexBoard.clearOccupation(attackingShip.getShipLocation(), attackingShip);
         System.out.println("Attacking ship " + attackingShip.getIdShip() + " has been destroyed.");
+
+        // 如果防守方没有剩余舰船，攻击方占领该六边形
+        if (defendingShips.isEmpty()) {
+            hexBoard.clearOccupation(targetHex, null); // 清除原防守方的占领信息
+
+            // 添加一艘新的攻击方舰船到目标六边形
+            Ship newShip = new Ship(this, hexBoard.getBoard().get(targetHex), targetHex, generateShipId(ships.size() + 1));
+            ships.add(newShip);
+            hexBoard.updateOccupation(targetHex, newShip);
+
+            System.out.println(name + " has taken control of hex " + targetHex);
+        } else {
+            // 更新防守方的占领信息
+            hexBoard.updateOccupation(targetHex, defendingShips.get(0));
+        }
     }
 
 
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     //得分扇区计分
     public void calculatePlayerScore(String sectorCard, HexBoard hexBoard) {
@@ -439,6 +648,7 @@ public class Player {
         this.addScore(score);  // 更新玩家的总得分
         System.out.println("Player " + getName() + " scored " + score + " points from sector card " + sectorCard);
     }
+
     
     public void setRoundScore(int score) {
         this.roundScore = score;
@@ -453,6 +663,13 @@ public class Player {
         this.roundScore = score; // 设置当轮得分
     }
 
+    
+    
+    
+    
+    
+    
+    
     
     // Getters 
     public String getName() {
