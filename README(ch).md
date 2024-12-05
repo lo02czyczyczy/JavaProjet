@@ -95,7 +95,8 @@
 - `HexBoard`管理多个`Hex`及其占领情况。
 - `ScoreManager`管理所有玩家的分数，并与`ScoreBoard`交互。
 
-![Uploading 5826fb5359ba7a154ff9614dd009f35.png…]()
+<img width="1016" alt="5826fb5359ba7a154ff9614dd009f35" src="https://github.com/user-attachments/assets/a93aaff1-8f49-4df1-863e-b0ebf59df5d2">
+
 
 
 ---
