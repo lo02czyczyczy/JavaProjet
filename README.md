@@ -337,9 +337,7 @@ Au cours du développement, nous avons rencontré et résolu plusieurs problème
    - Défi : Permettre à l'IA de prendre des décisions raisonnables sans ajouter de complexité.
    - Solution : Utilisation de stratégies aléatoires simples, combinées aux règles existantes du jeu, pour rendre le comportement de l'IA naturel.
 
-3. **Collaboration
-
- entre modules**
+3. **Collaboration entre modules**
    - Défi : L'interaction entre les modules peut augmenter le couplage, affectant les expansions futures.
    - Solution : Gestion unifiée du processus par la classe `Game`, réduisant la dépendance directe entre modules.
 
