@@ -3,119 +3,170 @@ package game;
 import java.util.*;
 import java.awt.EventQueue; 
 import java.util.stream.Collectors;
+import java.util.Scanner;
 
-
+/**
+ * The {@code Game} class orchestrates the entire flow of this strategy-based 
+ * space warfare board game. It manages players, rounds, scoring, and the 
+ * graphical components such as the hex board display and occupation display.
+ *
+ * <p>
+ * Major responsibilities include:
+ * <ul>
+ *   <li>Initializing the game with players, sectors, and the hex board.</li>
+ *   <li>Handling turn progression, including ship placement, command execution, and scoring.</li>
+ *   <li>Updating visual components (hex board display, occupation display) after significant events.</li>
+ *   <li>Determining the end of the game and the winner based on final scores.</li>
+ * </ul>
+ */
 public class Game {
+    // A list of all players participating in the game.
     private List<Player> players;
+    // A list of sectors, not extensively used in current implementation but available for future expansions.
     private List<Sector> sectors;
+    // The current round counter.
     private int turnCounter;
-    private int maxTurns; 
+    // The maximum number of turns (rounds) to play before the game ends.
+    private int maxTurns;
+    // The player who starts the game.
     private Player startPlayer;
-    private ScoreManager scoreManager; // 添加对ScoreManager的引用
+    // Manages scores, including round-by-round and final tally.
+    private ScoreManager scoreManager; 
+    // The scoreboard UI to display scores in a table format.
     private ScoreBoard scoreBoard;
+    // The hex board representing the galaxy map.
     private HexBoard hexBoard;  
-    private HexBoardDisplay hexBoardDisplay;  // 添加 HexBoardDisplay
+    // The graphical display of the hex board.
+    private HexBoardDisplay hexBoardDisplay;
+    // The UI for displaying which player occupies each hex.
     private OccupationDisplay occupationDisplay;
-    private int[][] commandMatrix = new int[3][3]; // 3x3矩阵，索引0对应Expand，1对应Explore，2对应Exterminate
+    // A 3x3 matrix tracking command usage per round (columns are rounds, rows are commands).
+    // commandMatrix[0][x] = usage of "Expand" in round x+1
+    // commandMatrix[1][x] = usage of "Explore" in round x+1
+    // commandMatrix[2][x] = usage of "Exterminate" in round x+1
+    private int[][] commandMatrix = new int[3][3];
+    // Flag indicating if the game has ended.
+    private boolean gameEnded = false;
 
-
- // 构造函数
+    /**
+     * Constructs a new Game instance with specified maximum turns, starting player, and a list of players.
+     *
+     * @param maxTurns    the maximum number of rounds
+     * @param startPlayer the player who starts the game (may be null at initialization)
+     * @param players     the list of players in the game
+     */
     public Game(int maxTurns, Player startPlayer, List<Player> players) {
-        this.players = players;  // 使用传入的玩家列表
+        this.players = players;  
         this.sectors = new ArrayList<>();
         this.turnCounter = 0;
         this.maxTurns = maxTurns;
-        this.startPlayer = startPlayer;  // 可以在之后设置
-        this.hexBoard = new HexBoard();  // 创建 HexBoard
+        this.startPlayer = startPlayer;
+        this.hexBoard = new HexBoard();
         this.hexBoardDisplay = new HexBoardDisplay(hexBoard);
         this.occupationDisplay = new OccupationDisplay(hexBoard);
-        this.scoreManager = new ScoreManager(players, this); // 初始化ScoreManager
+        this.scoreManager = new ScoreManager(players, this);
     }
 
-    
-    // 方法
+    /**
+     * Starts the game by displaying the board, initiating ship placement,
+     * and beginning the first round of the game.
+     */
     public void startGame() {
         EventQueue.invokeLater(() -> hexBoardDisplay.setVisible(true));
-        EventQueue.invokeLater(() -> occupationDisplay.displayOccupation()); // 显示占领情况
+        EventQueue.invokeLater(() -> occupationDisplay.displayOccupation());
         String cardInfo = hexBoard.getCardSectorInfo();
         System.out.println(cardInfo);
-        this.turnCounter = 1;  // 游戏开始，设置回合计数为1
-        this.scoreBoard = new ScoreBoard(scoreManager); // 初始化分数板
-        
-        // 在游戏开始时放置舰船
-        System.out.println("Starting ship placement...");
+        this.turnCounter = 1;  
+        this.scoreBoard = new ScoreBoard(scoreManager);
 
-        // 顺时针放置舰船
-        Set<String> occupiedSectors = new HashSet<>();  // 存储已占用的星系
+        System.out.println("Starting ship placement...");
+        Set<String> occupiedSectors = new HashSet<>();
+
+        // Clockwise ship placement
         for (Player player : players) {
             System.out.println("It's " + player.getName() + "'s turn to place ships.");
             player.placeShips(occupiedSectors);
-            occupationDisplay.displayOccupation(); // 更新显示占领情况
+            occupationDisplay.displayOccupation();
         }
 
-        // 逆时针放置舰船
+        // Counter-clockwise ship placement
         for (int i = players.size() - 1; i >= 0; i--) {
             Player player = players.get(i);
             System.out.println("It's " + player.getName() + "'s turn to place ships.");
             player.placeShips(occupiedSectors);
-            occupationDisplay.displayOccupation(); // 更新显示占领情况
+            occupationDisplay.displayOccupation();
         }
-        
+
         summarizeShipPlacement();
 
         System.out.println("Game started. It's " + startPlayer.getName() + "'s turn.");
-        nextTurn();  // 开始第一回合的执行
-        scoreManager.calculateRoundScores(this); // 开始游戏时计算第一轮分数
+        nextTurn();  
+        scoreManager.calculateRoundScores(this); 
     }
 
+    /**
+     * Proceeds to the next turn (round) of the game by setting each player's command order,
+     * updating the command usage matrix, executing the round's actions, and updating scores.
+     */
     public void nextTurn() {
         System.out.println("Turn " + turnCounter + " starts.");
-        // 确保为每个玩家设置命令顺序
+
+        // Players choose their command order for this turn
         for (Player player : players) {
             player.setCommandOrder();
             player.endTurn();
         }
         this.updateCommandMatrix();
-       
-        executeRound();  // 开始执行每个玩家的命令
-        scoreManager.calculateRoundScores(this); // 每个回合计算分数
-        scoreBoard.updateScores(); // 更新分数板
-        endRound();  // 调用endRound处理回合结束的逻辑
+
+        executeRound();  
+        scoreManager.calculateRoundScores(this); 
+        scoreBoard.updateScores(); 
+        endRound();  
     }
 
-    
+    /**
+     * Ends the current round by:
+     * <ul>
+     *   <li>Sustaining ships and removing any that can't be maintained in a given hex.</li>
+     *   <li>Allowing players (including any Tri-Prime controller) to choose sector cards for scoring.</li>
+     *   <li>Calculating and displaying scores.</li>
+     *   <li>Checking if the game has reached the maximum turns or if the game has ended.</li>
+     * </ul>
+     */
     public void endRound() {
-    	
-        sustainShips();          // 维持飞船并移除无法维持的飞船
-        chooseSectorCards();     // 让玩家选择星区卡牌进行得分
-        
-        // 显示并计算当前回合的得分
+        sustainShips();  
+        chooseSectorCards();     
         calculateScores();
-        scoreManager.calculateRoundScores(this); // 计算并更新每个玩家的分数
-        scoreBoard.updateScores(); // 更新分数板显示
+        scoreManager.calculateRoundScores(this);
+        scoreBoard.updateScores();
         System.out.println("**************************************************************************************************************************");
 
-        // 检查是否达到了最大回合数
+        // Check if we've reached the max number of turns
         if (turnCounter >= maxTurns) {
-            endGame();  // 如果达到最大回合数，结束游戏
-        } else {
-        	turnCounter++;  // 回合计数加一
-            nextTurn();  // 否则，开始下一个回合
+            endGame();
+            return;
+        }
+
+        // If the game hasn't ended, proceed to the next turn
+        if (!gameEnded) {
+            turnCounter++;
+            nextTurn();
         }
     }
 
-    
+    /**
+     * Summarizes the ship placement after the initial placement phase, listing where each player placed their ships.
+     */
     public void summarizeShipPlacement() {
-    	System.out.println("\n**************************************************************************************************************************");
+        System.out.println("\n**************************************************************************************************************************");
         System.out.println("\nSummary of Ship Placement:");
 
         for (Player player : players) {
             System.out.println(player.getName() + " placed ships at the following locations:");
             Map<String, Map<Hex, List<String>>> shipPlacementSummary = new HashMap<>();
 
-            // 遍历每个玩家的舰船
             for (Ship ship : player.getShips()) {
-                String sector = getSectorLabelForHex(ship.getShipLocation()); // 获取对应的星系名称
+                String sector = getSectorLabelForHex(ship.getShipLocation()); 
                 Hex position = ship.getShipLocation();
                 String shipId = ship.getIdShip();
 
@@ -125,7 +176,6 @@ public class Game {
                 sectorMap.get(position).add(shipId);
             }
 
-            // 输出玩家的舰船放置信息
             for (String sector : shipPlacementSummary.keySet()) {
                 Map<Hex, List<String>> sectorMap = shipPlacementSummary.get(sector);
                 for (Hex hex : sectorMap.keySet()) {
@@ -138,19 +188,26 @@ public class Game {
         System.out.println("**************************************************************************************************************************");
     }
 
-    // 获取某个坐标所属的星系标签的方法
+    /**
+     * Finds the sector label for a given hex by checking the card sets generated by the hex board.
+     *
+     * @param hex the hex whose sector label is needed
+     * @return the sector label as a string, or "Unknown" if not found
+     */
     private String getSectorLabelForHex(Hex hex) {
-        // 遍历所有星系卡牌及其对应坐标来找到匹配的星系名称
         Map<String, List<Hex>> cardHexes = hexBoard.generateCardHexes();
         for (Map.Entry<String, List<Hex>> entry : cardHexes.entrySet()) {
             if (entry.getValue().contains(hex)) {
                 return entry.getKey();
             }
         }
-        return "Unknown";  // 找不到对应星系的情况
+        return "Unknown";
     }
-    
-    // 更新矩阵
+
+    /**
+     * Updates the command usage matrix based on the current command orders chosen by each player.
+     * This helps in determining how often each command type was used in each position during the round.
+     */
     public void updateCommandMatrix() {
         for (int i = 0; i < 3; i++) {
             Arrays.fill(commandMatrix[i], 0);
@@ -164,30 +221,44 @@ public class Game {
             }
         }
 
-        System.out.println("Command Usage Matrix (The rows represent the types of cards, and the columns represent the rounds.):");
+        System.out.println("Command Usage Matrix (rows: commands, columns: command position in the round):");
         for (int i = 0; i < 3; i++) {
             System.out.println(Arrays.toString(commandMatrix[i]));
         }
     }
 
-    // 获取特定命令在特定轮次的使用次数
+    /**
+     * Returns the usage count for a specific command type in a given command position (round).
+     *
+     * @param round   the command position (1-based)
+     * @param command the command type (1=Expand, 2=Explore, 3=Exterminate)
+     * @return the number of times the command was used in that position
+     */
     public int getCommandUsage(int round, int command) {
-    	return commandMatrix[command - 1][round - 1];
+        return commandMatrix[command - 1][round - 1];
     }
 
-    
+    /**
+     * Executes one full round by iterating through command positions (1,2,3) and 
+     * having each player perform the command they assigned to that position.
+     */
     public void executeRound() {
         System.out.println("Executing round for all players");
-
-        for (int commandPos = 0; commandPos < 3; commandPos++) { // 命令位置从0到2，对应于每位玩家的命令1、2、3
+        for (int commandPos = 0; commandPos < 3; commandPos++) {
             for (Player player : players) {
-                int commandIndex = player.getCurrentCommandOrder().get(commandPos); // 获取当前玩家此位置的命令索引
+                int commandIndex = player.getCurrentCommandOrder().get(commandPos);
                 System.out.println("Executing command " + commandIndex + " for " + player.getName());
-                executeCommands(player, commandIndex); // 执行指定的命令
+                executeCommands(player, commandIndex);
             }
         }
     }
 
+    /**
+     * Executes the specified command (Expand, Explore, or Exterminate) for a given player.
+     *
+     * @param player       the player executing the command
+     * @param commandIndex the command type (1=Expand, 2=Explore, 3=Exterminate)
+     */
     private void executeCommands(Player player, Integer commandIndex) {
         switch (commandIndex) {
             case 1:
@@ -203,90 +274,143 @@ public class Game {
                 System.out.println("Unknown command.");
                 break;
         }
+        this.getOccupationDisplay().displayOccupation();
     }
 
-    
-    //维持船只
+    /**
+     * Sustains ships at the end of a round. If a hex is over capacity (more ships than allowed
+     * by the sector level), excess ships are removed.
+     */
     public void sustainShips() {
         Map<Hex, HexBoard.OccupationInfo> occupationMap = hexBoard.getOccupationMap();
 
-        // 迭代每个六边形和它的占领信息
         Iterator<Map.Entry<Hex, HexBoard.OccupationInfo>> it = occupationMap.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<Hex, HexBoard.OccupationInfo> entry = it.next();
             Hex hex = entry.getKey();
             HexBoard.OccupationInfo occupationInfo = entry.getValue();
             Sector sector = hexBoard.getBoard().get(hex);
-            int maxShipsSustained = 1 + sector.getSector();  // 假设getSector()返回的是系统等级
+            int maxShipsSustained = 1 + sector.getSector();
 
             List<Ship> ships = occupationInfo.getOccupyingShips();
+            Player player = ships.get(0).getOwner();
             if (ships.size() > maxShipsSustained) {
-                // 如果舰船数量超出了最大维持量，截断列表
+                // Remove excess ships
                 List<Ship> toRemove = new ArrayList<>(ships.subList(maxShipsSustained, ships.size()));
-                ships.removeAll(toRemove);  // 安全移除超出部分的舰船
-                // 此处可以处理舰船返回到供给区的逻辑
+                for (Ship ship : toRemove) {
+                    player.removeShip(ship);
+                    System.out.println("Ship " + ship.getIdShip() + " removed due to overcapacity in Hex " + hex);
+                }
+                ships.removeAll(toRemove);
             }
 
-            // 如果没有舰船占据此六边形，清空占领信息
+            // If no ships remain, clear occupation
             if (ships.isEmpty()) {
-                it.remove();  // 安全地从映射中移除当前项
-                hexBoard.clearOccupation(hex, null);  // 假设这个方法可以处理清除占领
+                it.remove();
+                hexBoard.clearOccupation(hex, null);
             }
         }
+        this.getOccupationDisplay().displayOccupation();
     }
 
-
-    //玩家选得分扇区
+    /**
+     * Allows each player to choose sector cards for scoring at the end of a round.
+     * If a player controls Tri-Prime, they choose twice.
+     * Scores from chosen sectors are then added to each player's total.
+     */
     public void chooseSectorCards() {
         List<String> availableCards = new ArrayList<>(Arrays.asList("a", "b", "c", "d", "e", "f", "g", "h"));
-
         System.out.println("Now pick a sector card to calculate the score for this round.");
+
+        Player triPrimeController = null;
+
+        // Identify the Tri-Prime controlling player, if any
         for (Player player : players) {
-            // 检查是否有可用的星区卡牌
-            if (availableCards.isEmpty()) {
-                System.out.println("No available sectors to choose for scoring.");
+            if (hexBoard.isTriPrimeControlledBy(player.getId())) {
+                triPrimeController = player;
                 break;
             }
+        }
 
-            String chosenCard = player.chooseSectorCard(availableCards);
+        for (Player player : players) {
+            int roundScore = 0; 
+            System.out.println(player.getName() + "'s turn to choose a sector card.");
 
-            availableCards.remove(chosenCard);
-            player.calculatePlayerScore(chosenCard, hexBoard);  // 计算玩家在选择的星区中的得分
+            if (player == triPrimeController) {
+                // Tri-Prime controller chooses twice
+                for (int i = 0; i < 2; i++) {
+                    if (availableCards.isEmpty()) break;
+                    String chosenCard = player.chooseSectorCard(availableCards);
+                    availableCards.remove(chosenCard);
+
+                    roundScore += player.calculatePlayerScore(chosenCard, hexBoard);
+                    System.out.println(player.getName() + " scored from sector card: " + chosenCard);
+                }
+            } else {
+                // Other players choose once
+                if (!availableCards.isEmpty()) {
+                    String chosenCard = player.chooseSectorCard(availableCards);
+                    availableCards.remove(chosenCard);
+
+                    roundScore += player.calculatePlayerScore(chosenCard, hexBoard);
+                    System.out.println(player.getName() + " scored from sector card: " + chosenCard);
+                }
+            }
+
+            player.addScore(roundScore);
+            System.out.println(player.getName() + " scored a total of " + roundScore + " points this round.");
         }
     }
 
-
-    
+    /**
+     * Calculates and displays scores after the current round, showing round-specific and cumulative totals.
+     */
     public void calculateScores() {
         System.out.println("Scores for round " + turnCounter + ":");
-        
-        // 显示每位玩家在这一轮的得分
         for (Player player : players) {
             System.out.println("Player " + player.getName() + " scored " + player.getRoundScore() + " in round " + turnCounter);
         }
 
-        // 显示游戏进行到目前的总分
         System.out.println("Total scores after " + turnCounter + " rounds:");
         for (Player player : players) {
             System.out.println("Player " + player.getName() + ": " + player.getScore());
         }
     }
 
-    
+    /**
+     * Performs final scoring when the game ends, often by doubling control scores or applying other endgame rules.
+     */
+    public void calculateFinalScores() {
+        System.out.println("Performing final scoring...");
+        for (Player player : players) {
+            int finalScore = player.calculateFinalScore(hexBoard);
+            player.addScore(finalScore);
+        }
+        System.out.println("Final scoring completed.");
+    }
+
+    /**
+     * Ends the game after reaching the maximum number of turns. Performs final scoring and determines the winner.
+     */
     public void endGame() {
+        gameEnded = true;
         System.out.println("Game ends after " + maxTurns + " turns.");
+        calculateFinalScores();
         determineWinner();
     }
 
+    /**
+     * Determines the winner based on the highest total score. If there's a tie, all top-scoring players are announced.
+     */
     public void determineWinner() {
         int highestScore = players.stream()
                                   .mapToInt(Player::getScore)
                                   .max()
-                                  .orElse(Integer.MIN_VALUE);  // 找出最高得分
+                                  .orElse(Integer.MIN_VALUE);  
 
         List<Player> winners = players.stream()
                                       .filter(p -> p.getScore() == highestScore)
-                                      .collect(Collectors.toList());  // 找出所有得分最高的玩家
+                                      .collect(Collectors.toList());
 
         if (winners.size() == 1) {
             System.out.println("The winner is " + winners.get(0).getName() + " with a score of " + highestScore + "!");
@@ -298,70 +422,131 @@ public class Game {
         }
     }
 
-
     // Getters and Setters
+
+    /**
+     * Returns the list of players in the game.
+     *
+     * @return the list of players
+     */
     public List<Player> getPlayers() {
         return players;
     }
 
+    /**
+     * Sets the list of players in the game and updates the score manager accordingly.
+     *
+     * @param players the new list of players
+     */
     public void setPlayers(List<Player> players) {
         this.players = players;
+        this.scoreManager = new ScoreManager(players, this);
     }
 
+    /**
+     * Returns the list of sectors in the game (not heavily used here).
+     *
+     * @return the list of sectors
+     */
     public List<Sector> getSectors() {
         return sectors;
     }
 
+    /**
+     * Sets the list of sectors.
+     *
+     * @param sectors the new list of sectors
+     */
     public void setSectors(List<Sector> sectors) {
         this.sectors = sectors;
     }
 
+    /**
+     * Returns the current turn counter.
+     *
+     * @return the turn counter
+     */
     public int getTurnCounter() {
         return turnCounter;
     }
 
+    /**
+     * Sets the current turn counter.
+     *
+     * @param turnCounter the new turn counter
+     */
     public void setTurnCounter(int turnCounter) {
         this.turnCounter = turnCounter;
     }
 
+    /**
+     * Returns the maximum number of turns the game will run.
+     *
+     * @return the maximum turns
+     */
     public int getMaxTurns() {
         return maxTurns;
     }
 
+    /**
+     * Sets the maximum number of turns.
+     *
+     * @param maxTurns the new maximum turns
+     */
     public void setMaxTurns(int maxTurns) {
         this.maxTurns = maxTurns;
     }
 
+    /**
+     * Returns the player who starts the game.
+     *
+     * @return the start player
+     */
     public Player getStartPlayer() {
         return startPlayer;
     }
 
+    /**
+     * Sets the player who starts the game.
+     *
+     * @param startPlayer the player who starts
+     */
     public void setStartPlayer(Player startPlayer) {
         this.startPlayer = startPlayer;
     }
-    
+
+    /**
+     * Returns the hex board of the game.
+     *
+     * @return the HexBoard
+     */
     public HexBoard getHexBoard() {
         return this.hexBoard;
     }
 
-    
-    
-    
-    
-    
-    
-    //main
+    /**
+     * Returns the occupation display UI component.
+     *
+     * @return the OccupationDisplay instance
+     */
+    public OccupationDisplay getOccupationDisplay() {
+        return occupationDisplay;
+    }
+
+    /**
+     * The main method to run the game. It prompts the user for the number of players and their details,
+     * creates a Game instance, and starts the game.
+     *
+     * @param args command-line arguments (unused)
+     */
     public static void main(String[] args) {
-        // 初始化玩家列表
         List<Player> players = new ArrayList<>();
         System.out.println("Welcome to the game! Please enter player details.");
 
-        // 创建 Game 对象
-        Game game = new Game(9, null, players);  // 初始时没有 startPlayer，暂时传 null
+        Game game = new Game(9, null, players);  
 
         Set<Integer> availableIds = new HashSet<>(Arrays.asList(1, 2, 3));
 
-        // 提示用户输入玩家数量（2 或 3）
         Scanner scanner = new Scanner(System.in);
         int numPlayers = 0;
         while (numPlayers < 2 || numPlayers > 3) {
@@ -376,7 +561,7 @@ public class Game {
             }
         }
 
-        // 创建玩家并传入正确的 game 对象
+        // Create players
         for (int i = 0; i < numPlayers; i++) {
             System.out.print("Enter name for player " + (i + 1) + ": ");
             String name = scanner.nextLine().trim();
@@ -384,17 +569,15 @@ public class Game {
             int id = getAvailableId(availableIds, scanner);
 
             if (name.equalsIgnoreCase("VirtualPlayer")) {
-                // 创建 VirtualPlayer
                 VirtualPlayer virtualPlayer = new VirtualPlayer("VirtualPlayer" + id, id, game);
                 players.add(virtualPlayer);
             } else {
-                // 创建普通玩家
                 Player player = new Player(name, id, game);
                 players.add(player);
             }
         }
 
-        // 自动添加虚拟玩家，直到玩家数量达到3人
+        // If less than 3 players, fill remaining spots with virtual players
         while (players.size() < 3) {
             int id = availableIds.iterator().next();
             availableIds.remove(id);
@@ -403,10 +586,9 @@ public class Game {
             System.out.println("Added VirtualPlayer" + id + " to the game.");
         }
 
-        // 设置游戏的玩家列表
         game.setPlayers(players);
 
-        // 查找 ID 为 1 的玩家作为开始玩家
+        // Set the start player (with ID 1)
         Player startPlayer = players.stream()
                 .filter(p -> p.getId() == 1)
                 .findFirst()
@@ -414,23 +596,22 @@ public class Game {
 
         if (startPlayer == null) {
             System.out.println("No player with ID 1 found, please ensure one of the players has ID 1.");
-            return; // 如果没有找到 ID 为 1 的玩家，结束程序
+            return;
         }
 
-        // 设置游戏的开始玩家
         game.setStartPlayer(startPlayer);
 
-        // 开始游戏
-        game.startGame();  // 开始游戏逻辑
-
-        // 模拟游戏的回合进行
-        while (game.getTurnCounter() <= game.getMaxTurns()) {
-            game.nextTurn();
-        }
+        // Start the game
+        game.startGame();
     }
 
-
-    // 获取可用的玩家 ID
+    /**
+     * Gets an available ID from the user for a new player.
+     *
+     * @param availableIds the set of IDs that can still be chosen
+     * @param scanner      the Scanner for user input
+     * @return a valid chosen ID
+     */
     private static int getAvailableId(Set<Integer> availableIds, Scanner scanner) {
         int id = 0;
         while (id == 0) {
@@ -449,5 +630,4 @@ public class Game {
         }
         return id;
     }
-
 }

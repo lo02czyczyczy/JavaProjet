@@ -2,13 +2,32 @@ package game;
 
 import java.util.*;
 
+/**
+ * Represents a hexagonal tile in a cube-coordinate system.
+ * Each hex is defined by three coordinates (q, r, s) where q + r + s must equal 0.
+ */
 public class Hex {
-    public int q;  // x-axis in cube coordinates
-    public int r;  // y-axis in cube coordinates
-    public int s;  // z-axis in cube coordinates
-    private Sector sector;  // the sector associated with this hex
+    
+    /** The x-axis coordinate in cube space. */
+    public int q;  
 
-    // Constructor
+    /** The y-axis coordinate in cube space. */
+    public int r;  
+
+    /** The z-axis coordinate in cube space. */
+    public int s;  
+
+    /** The sector associated with this hex. */
+    private Sector sector;  
+
+    /**
+     * Constructs a Hex with specified cube coordinates.
+     *
+     * @param q The x-axis coordinate.
+     * @param r The y-axis coordinate.
+     * @param s The z-axis coordinate.
+     * @throws IllegalArgumentException If q + r + s != 0.
+     */
     public Hex(int q, int r, int s) {
         if (q + r + s != 0) {
             throw new IllegalArgumentException("Cube coordinates must satisfy q + r + s = 0");
@@ -18,7 +37,12 @@ public class Hex {
         this.s = s;
     }
 
-    // Get adjacent hexes based on cube coordinates
+    /**
+     * Retrieves the neighboring hexes from the provided game board.
+     *
+     * @param board A map of hexes to their corresponding sectors.
+     * @return A list of neighboring hexes that exist on the board.
+     */
     public List<Hex> getNeighbors(Map<Hex, Sector> board) {
         List<Hex> neighbors = new ArrayList<>();
         Hex[] possibleNeighbors = {
@@ -37,9 +61,13 @@ public class Hex {
         return neighbors;
     }
     
-    // 检查是否为邻居的方法
+    /**
+     * Determines whether another hex is a direct neighbor of this hex.
+     *
+     * @param other The hex to compare against.
+     * @return true if the other hex is a neighbor, false otherwise.
+     */
     public boolean isNeighbor(Hex other) {
-        // 在六边形网格中，邻居的定义是q, r, s坐标的差的绝对值之和为2且任意两个坐标的差的绝对值不超过1
         int dq = Math.abs(this.q - other.q);
         int dr = Math.abs(this.r - other.r);
         int ds = Math.abs(this.s - other.s);
@@ -47,7 +75,11 @@ public class Hex {
         return (dq + dr + ds == 2) && (dq <= 1 && dr <= 1 && ds <= 1);
     }
 
-    // Get the sector of this hex
+    /**
+     * Retrieves the sector associated with this hex.
+     *
+     * @return The current sector of this hex.
+     */
     public Sector getSector() {
         return sector;
     }
